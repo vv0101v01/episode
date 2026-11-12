@@ -1,0 +1,63 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dtt03/h6_unified_pipeline"
+
+import {
+  "dtt03/h3_nbe_typecheck",
+  "dtt03/h4_reduction_localization",
+  "dtt03/h5_rule_kernel_chu",
+}
+
+// Values
+pub fn corpus() -> Array[(String, String)]
+
+pub fn run_pipeline(String, budget~ : Int32, fuel~ : Int32) -> PipelineReport raise @h3_nbe_typecheck.KernelError
+
+pub fn system_audit() -> SystemAudit
+
+// Errors
+
+// Types and methods
+pub(all) struct PipelineReport {
+  term_size : Int32
+  ty : String
+  derivation_size : Int32
+  formation : Int32
+  introduction : Int32
+  elimination : Int32
+  structural : Int32
+  normal_form : String
+  normal_form_valid : Bool
+  beta_steps : Int32
+  iota_steps : Int32
+  eta_expansions : Int32
+  thunks_created : Int32
+  thunks_forced : Int32
+  code_size : Int32
+  machine_value : String
+  machine_steps : Int32
+  machine_allocs : Int32
+  machine_updates : Int32
+  machine_agrees : Bool
+  bridge : @h4_reduction_localization.BridgeReport
+  nf_tree_size : Int32
+  nf_dag_size : Int32
+}
+pub fn PipelineReport::certified(Self) -> Bool
+pub fn PipelineReport::render(Self) -> String
+
+pub(all) struct SystemAudit {
+  formers : Array[@h5_rule_kernel_chu.FormerReport]
+  chu : @h5_rule_kernel_chu.ChuReport
+  logic_galois_pairs : Int32
+  logic_galois_holds : Bool
+  logic_concepts : Int32
+  tonk_rejected : Bool
+  weak_and_rejected : Bool
+  general_elims_harmonious : Bool
+}
+pub fn SystemAudit::certified(Self) -> Bool
+pub fn SystemAudit::render(Self) -> String
+
+// Type aliases
+
+// Traits

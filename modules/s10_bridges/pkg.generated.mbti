@@ -1,0 +1,126 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dtt03/s10_bridges"
+
+import {
+  "dtt03/h3_nbe_typecheck",
+  "dtt03/s1_de_morgan_cubes",
+  "dtt03/s3_weak_omega_groupoid",
+  "dtt03/s4_rewriting_cover",
+  "dtt03/s5_connection_curvature",
+}
+
+// Values
+pub fn boolean_quotient(Int32) -> BooleanQuotient raise @h3_nbe_typecheck.KernelError
+
+pub fn coherences_in_rewriting_group(@s4_rewriting_cover.Presentation) -> (Int32, Int32, Bool)? raise @s3_weak_omega_groupoid.CattError
+
+pub fn coset_action(Array[Array[Int32]], Array[Int32]) -> GSet
+
+pub fn count_equivariant(GSet, GSet) -> Int32
+
+pub fn cyclic_presentation(Int32) -> @s4_rewriting_cover.Presentation
+
+pub fn dm_to_bool(@s1_de_morgan_cubes.Dm) -> String
+
+pub fn eckmann_hilton(@s4_rewriting_cover.Presentation) -> EckmannHilton?
+
+pub fn gluing_sample(Int32, Int32, Int32, Int32, Int32) -> GluingReport
+
+pub fn group_algebra(Array[Array[Int32]]) -> Algebra
+
+pub fn group_table(@s4_rewriting_cover.Presentation, max_rules~ : Int32, limit~ : Int32) -> Array[Array[Int32]]?
+
+pub fn inverses(Array[Array[Int32]]) -> Array[Int32]
+
+pub fn left_kan(Array[Array[Int32]], Array[Int32], GSet) -> GSet
+
+pub fn positions(Int32, Array[Int32]) -> Array[Int32]
+
+pub fn restrict(GSet, Array[Int32]) -> GSet
+
+pub fn right_kan(Array[Array[Int32]], Array[Int32], GSet) -> GSet
+
+pub fn round_two_audit() -> Array[(String, String, Bool)] raise
+
+pub fn s3_presentation() -> @s4_rewriting_cover.Presentation
+
+pub fn sections(@s4_rewriting_cover.Complex, @s5_connection_curvature.Connection, Array[Int32]) -> Array[Array[Int32]]
+
+pub fn subgroup(Array[Array[Int32]], Array[Int32]) -> Array[Int32]
+
+pub fn subgroup_table(Array[Array[Int32]], Array[Int32]) -> Array[Array[Int32]]
+
+pub fn upper_triangular() -> Algebra
+
+pub fn verify_gluing(@s4_rewriting_cover.Complex, @s5_connection_curvature.Connection, Array[Int32], Array[Int32]) -> GluingReport
+
+pub fn verify_kan(Array[Array[Int32]], Array[Int32], Array[Int32], Array[Int32]) -> KanReport
+
+pub fn verify_morita(Algebra, Int32) -> (Int32, Int32, Int32, Int32, Bool, Bool)
+
+pub fn verify_negation_galois(Int32) -> (Int32, Bool)
+
+// Errors
+
+// Types and methods
+pub(all) struct Algebra {
+  dim : Int32
+  mul : Array[Array[Array[Int32]]]
+}
+pub fn Algebra::center_dim(Self) -> Int32
+pub fn Algebra::cocenter_dim(Self) -> Int32
+pub fn Algebra::is_associative(Self) -> Bool
+pub fn Algebra::matrices(Self, Int32) -> Self
+pub fn Algebra::product(Self, Array[Int32], Array[Int32]) -> Array[Int32]
+
+pub(all) struct BooleanQuotient {
+  de_morgan_elements : Int32
+  boolean_classes : Int32
+  proved : Int32
+  kernel_accepted : Int32
+  refuted : Int32
+  collapsed : Int32
+}
+
+pub(all) struct EckmannHilton {
+  e1_components : Int32
+  e2_components : Int32
+  e1_action_is_product : Bool
+  commutative : Bool
+  abelianization_order : Int32
+  group_order : Int32
+}
+
+pub(all) struct GSet {
+  size : Int32
+  act : Array[Array[Int32]]
+}
+pub fn GSet::is_action(Self, Array[Array[Int32]]) -> Bool
+pub fn GSet::with_fixed_point(Self) -> Self
+
+pub(all) struct GluingReport {
+  sections_u : Int32
+  sections_v : Int32
+  sections_union : Int32
+  compatible_pairs : Int32
+  unique_gluing : Bool
+}
+pub fn GluingReport::is_sheaf(Self) -> Bool
+
+pub(all) struct KanReport {
+  group_order : Int32
+  subgroup_order : Int32
+  x_size : Int32
+  y_size : Int32
+  lan_size : Int32
+  ran_size : Int32
+  lan_is_action : Bool
+  ran_is_action : Bool
+  left_hom : (Int32, Int32)
+  right_hom : (Int32, Int32)
+}
+pub fn KanReport::holds(Self) -> Bool
+
+// Type aliases
+
+// Traits

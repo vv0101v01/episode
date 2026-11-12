@@ -1,0 +1,6 @@
+import {
+  "dtt03/h6_unified_pipeline" @h6,
+  "dtt03/s10_bridges" @s10,
+}
+
+pkgtype(kind: "executable")

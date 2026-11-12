@@ -1,0 +1,12 @@
+import {
+  "dtt03/s1_de_morgan_cubes" @s1,
+  "dtt03/s2_cubical_paths" @s2,
+  "dtt03/s3_weak_omega_groupoid" @s3,
+  "dtt03/s4_rewriting_cover" @s4,
+  "dtt03/s5_connection_curvature" @s5,
+  "dtt03/s6_deformation_derived" @s6,
+  "dtt03/s7_adjoint_logic" @s7,
+  "dtt03/s8_symbolic_nbe" @s8,
+  "dtt03/s9_little_cubes" @s9,
+  "dtt03/h3_nbe_typecheck" @h3,
+}

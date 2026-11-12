@@ -1,0 +1,67 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dtt03/s8_symbolic_nbe"
+
+import {
+  "dtt03/h3_nbe_typecheck",
+}
+
+// Values
+pub fn build_ctx(@h3_nbe_typecheck.Kernel, Array[@h3_nbe_typecheck.Tm]) -> @h3_nbe_typecheck.Ctx raise @h3_nbe_typecheck.KernelError
+
+pub fn corpus() -> Array[(String, String, String)]
+
+pub fn execute(@h3_nbe_typecheck.Kernel, Array[@h3_nbe_typecheck.Tm], @h3_nbe_typecheck.Tm, Int32) -> SymTree raise @h3_nbe_typecheck.KernelError
+
+pub fn prelude() -> String
+
+pub fn prove(@h3_nbe_typecheck.Kernel, @h3_nbe_typecheck.Tm) -> ProofReport raise @h3_nbe_typecheck.KernelError
+
+pub fn prove_source(String) -> ProofReport raise @h3_nbe_typecheck.KernelError
+
+pub fn replace_var(@h3_nbe_typecheck.Tm, Int32, @h3_nbe_typecheck.Tm) -> @h3_nbe_typecheck.Tm
+
+pub fn verify_corpus() -> (Int32, Int32, Bool)
+
+// Errors
+
+// Types and methods
+pub(all) enum Outcome {
+  Proved(@h3_nbe_typecheck.Tm)
+  Refuted(Array[String])
+  Stuck(String)
+}
+
+pub(all) struct ProofReport {
+  status : String
+  detail : String
+  kernel_accepted : Bool
+  proof_size : Int32
+  derivation_size : Int32
+  leaves : Int32
+  bool_splits : Int32
+  inductions : Int32
+  ih_rewrites : Int32
+  normalizations : Int32
+}
+
+pub(all) struct Stats {
+  mut normalizations : Int32
+  mut leaves : Int32
+  mut bool_splits : Int32
+  mut inductions : Int32
+  mut ih_rewrites : Int32
+}
+
+pub(all) enum SymTree {
+  Leaf(@h3_nbe_typecheck.Tm)
+  BoolSplit(Int32, SymTree, SymTree)
+  NatSplit(Int32, SymTree, SymTree)
+  Cutoff(@h3_nbe_typecheck.Tm)
+}
+pub fn SymTree::cutoffs(Self) -> Int32
+pub fn SymTree::leaves(Self) -> Int32
+pub fn SymTree::render(Self) -> String
+
+// Type aliases
+
+// Traits

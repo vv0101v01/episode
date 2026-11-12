@@ -1,0 +1,89 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dtt03/s5_connection_curvature"
+
+import {
+  "dtt03/s4_rewriting_cover",
+}
+
+// Values
+pub fn components(@s4_rewriting_cover.Complex) -> Int32
+
+pub fn factorial(Int32) -> Int32
+
+pub fn generated_group(Array[Array[Int32]], Int32) -> Array[Array[Int32]]
+
+pub fn grid_boundary(Int32, Int32) -> Array[Int32]
+
+pub fn grid_disk(Int32, Int32) -> @s4_rewriting_cover.Complex
+
+pub fn grid_lasso(Int32, Int32, Int32, Int32) -> Array[Int32]
+
+pub fn groupoid_model(@s4_rewriting_cover.Complex, max_rules~ : Int32, limit~ : Int32) -> GroupoidModelReport?
+
+pub fn perm_id(Int32) -> Array[Int32]
+
+pub fn perm_inv(Array[Int32]) -> Array[Int32]
+
+pub fn perm_is_id(Array[Int32]) -> Bool
+
+pub fn perm_then(Array[Int32], Array[Int32]) -> Array[Int32]
+
+pub fn perm_unrank(Int32, Int32) -> Array[Int32]
+
+pub fn pure_gauge(@s4_rewriting_cover.Complex, Array[Array[Int32]], Int32) -> Connection
+
+pub fn random_connection(@s4_rewriting_cover.Complex, Int32, Lcg) -> Connection
+
+pub fn representable_connection(@s4_rewriting_cover.Complex, max_rules~ : Int32, limit~ : Int32) -> Connection?
+
+pub fn verify_ambrose_singer(Int32, Int32, Int32, Int32) -> (Int32, Int32, Bool)
+
+pub fn verify_flat_count(@s4_rewriting_cover.Complex, Int32) -> (Int32, Int32, Bool)
+
+pub fn verify_gauge_covariance(@s4_rewriting_cover.Complex, Int32, Int32, Int32) -> (Int32, Bool)
+
+pub fn verify_monodromy_representation(@s4_rewriting_cover.Complex, Connection, Int32, max_rules~ : Int32) -> (Int32, Bool)
+
+pub fn verify_nonabelian_stokes(Int32, Int32, Int32, Int32, Int32) -> (Int32, Bool)
+
+// Errors
+
+// Types and methods
+pub(all) struct Connection {
+  fiber : Int32
+  tau : Array[Array[Int32]]
+}
+pub fn Connection::curvature(Self, @s4_rewriting_cover.Complex) -> Array[Array[Int32]]
+pub fn Connection::gauge(Self, @s4_rewriting_cover.Complex, Array[Array[Int32]]) -> Self
+pub fn Connection::holonomy(Self, Array[Int32]) -> Array[Int32]
+pub fn Connection::horizontal(Self) -> Horizontal
+pub fn Connection::is_flat(Self, @s4_rewriting_cover.Complex) -> Bool
+pub fn Connection::total_space(Self, @s4_rewriting_cover.Complex) -> (@s4_rewriting_cover.Complex, Int32)
+
+pub(all) struct GroupoidModelReport {
+  loop_space : Int32
+  uip_fails : Bool
+  based_paths_flat : Bool
+  based_paths_connected : Bool
+  based_paths_simply_connected : Bool
+  total_vertices : Int32
+  total_edges : Int32
+  total_faces : Int32
+  euler_multiplicative : Bool
+  transport_functorial : Bool
+}
+
+pub(all) struct Horizontal {
+  fiber : Int32
+  lifts : Array[Array[(Int32, Int32)]]
+}
+pub fn Horizontal::to_connection(Self) -> Connection?
+
+pub(all) struct Lcg {
+  mut state : Int32
+}
+pub fn Lcg::next(Self, Int32) -> Int32
+
+// Type aliases
+
+// Traits

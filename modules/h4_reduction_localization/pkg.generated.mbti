@@ -1,0 +1,54 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dtt03/h4_reduction_localization"
+
+import {
+  "dtt03/h2_beta_eta_sn",
+  "dtt03/h3_nbe_typecheck",
+}
+
+// Values
+pub fn analyze(@h3_nbe_typecheck.Kernel, @h2_beta_eta_sn.Arena, @h3_nbe_typecheck.Tm, budget~ : Int32) -> BridgeReport raise @h3_nbe_typecheck.KernelError
+
+pub fn embed(@h2_beta_eta_sn.Arena, @h3_nbe_typecheck.Tm) -> Int32
+
+pub fn reify(@h2_beta_eta_sn.Arena, Int32) -> @h3_nbe_typecheck.Tm
+
+pub fn verify_confluence_squares(@h3_nbe_typecheck.Kernel, @h2_beta_eta_sn.Arena, @h3_nbe_typecheck.Tm, fuel~ : Int32) -> (Int32, Bool) raise @h3_nbe_typecheck.KernelError
+
+// Errors
+
+// Types and methods
+pub(all) struct BridgeReport {
+  nbe_nf : @h3_nbe_typecheck.Tm
+  beta_nf : Int32
+  syntactic_agreement : Bool
+  definitional_agreement : Bool
+  verdict : @h2_beta_eta_sn.SnVerdict
+  graph_nodes : Int32
+  graph_edges : Int32
+  longest : Int32
+  shortest : Int32
+  unique_normal_form : Bool
+  leftmost_steps : Int32
+  perpetual_steps : Int32
+  gross_knuth_rounds : Int32
+  perpetual_is_longest : Bool
+  reducts_checked : Int32
+  subject_reduction : Bool
+  reductions_inverted : Bool
+}
+
+pub(all) struct Localizer {
+  arena : @h2_beta_eta_sn.Arena
+  kernel : @h3_nbe_typecheck.Kernel
+  classes : Map[Int32, Int32]
+  mut lookups : Int32
+  mut normalizations : Int32
+}
+pub fn Localizer::class_of(Self, @h3_nbe_typecheck.Tm) -> Int32 raise @h3_nbe_typecheck.KernelError
+pub fn Localizer::equivalent(Self, @h3_nbe_typecheck.Tm, @h3_nbe_typecheck.Tm) -> Bool raise @h3_nbe_typecheck.KernelError
+pub fn Localizer::new(@h2_beta_eta_sn.Arena, @h3_nbe_typecheck.Kernel) -> Self
+
+// Type aliases
+
+// Traits

@@ -1,0 +1,103 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dtt03/s7_adjoint_logic"
+
+// Values
+pub fn bang(Prop) -> Prop
+
+pub fn lnl_claims() -> Array[Claim]
+
+pub fn lnl_cut_examples() -> Array[Claim]
+
+pub fn lnl_modes() -> Modes
+
+pub fn normalize(Tm, fuel~ : Int32) -> (Tm, Int32, Bool)
+
+pub fn prop_equal(Prop, Prop) -> Bool
+
+pub fn s4_claims() -> Array[Claim]
+
+pub fn s4_modes() -> Modes
+
+pub fn step(Tm) -> Tm?
+
+pub fn substructural_claims() -> Array[Claim]
+
+pub fn substructural_modes() -> Modes
+
+pub fn tm_size(Tm) -> Int32
+
+pub fn verify_adjunction() -> (Int32, Bool, Bool)
+
+pub fn verify_claims(Modes, Array[Claim]) -> (Int32, Int32)
+
+pub fn verify_subject_reduction(Modes, Array[Claim]) -> (Int32, Bool, Bool, Int32)
+
+// Errors
+pub suberror AdjointError {
+  Refuse(String)
+}
+pub fn AdjointError::message(Self) -> String
+
+// Types and methods
+pub(all) struct Checker {
+  modes : Modes
+  mut nodes : Int32
+  mut independence_checks : Int32
+}
+pub fn Checker::infer(Self, Array[Prop], Tm) -> (Prop, Array[Int32]) raise AdjointError
+pub fn Checker::new(Modes) -> Self
+pub fn Checker::proves(Self, Tm, Prop) -> (Bool, String)
+
+pub(all) struct Claim {
+  name : String
+  term : Tm
+  goal : Prop
+  expected : Bool
+}
+
+pub(all) struct Modes {
+  names : Array[String]
+  weaken : Array[Bool]
+  contract : Array[Bool]
+  geq : Array[Array[Bool]]
+}
+pub fn Modes::check_prop(Self, Prop) -> Unit raise AdjointError
+pub fn Modes::is_monotone(Self) -> Bool
+pub fn Modes::new(Array[String], Array[Bool], Array[Bool], Array[(Int32, Int32)]) -> Self
+pub fn Modes::show_prop(Self, Prop) -> String
+
+pub(all) enum Prop {
+  Atom(String, Int32)
+  Lolli(Prop, Prop)
+  Tensor(Prop, Prop)
+  One(Int32)
+  With(Prop, Prop)
+  Plus(Prop, Prop)
+  Up(Int32, Prop)
+  Down(Int32, Prop)
+}
+pub fn Prop::mode(Self) -> Int32
+
+pub(all) enum Tm {
+  Var(Int32)
+  Lam(Prop, Tm)
+  App(Tm, Tm)
+  Pair(Tm, Tm)
+  LetPair(Tm, Tm)
+  Unit(Int32)
+  LetUnit(Tm, Tm)
+  WithPair(Tm, Tm)
+  Fst(Tm)
+  Snd(Tm)
+  Inl(Prop, Tm)
+  Inr(Prop, Tm)
+  Case(Tm, Tm, Tm)
+  Susp(Int32, Tm)
+  Force(Tm)
+  Down(Int32, Tm)
+  LetDown(Tm, Tm)
+}
+
+// Type aliases
+
+// Traits

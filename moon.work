@@ -1,0 +1,18 @@
+members = [
+  "modules/h1_rule_harmony",
+  "modules/h2_beta_eta_sn",
+  "modules/h3_nbe_typecheck",
+  "modules/h4_reduction_localization",
+  "modules/h5_rule_kernel_chu",
+  "modules/h6_unified_pipeline",
+  "modules/s1_de_morgan_cubes",
+  "modules/s2_cubical_paths",
+  "modules/s3_weak_omega_groupoid",
+  "modules/s4_rewriting_cover",
+  "modules/s5_connection_curvature",
+  "modules/s6_deformation_derived",
+  "modules/s7_adjoint_logic",
+  "modules/s8_symbolic_nbe",
+  "modules/s9_little_cubes",
+  "modules/s10_bridges",
+]

@@ -1,0 +1,333 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dtt03/h3_nbe_typecheck"
+
+// Values
+pub fn as_numeral(Tm) -> Int32?
+
+pub fn code_size(Code) -> Int32
+
+pub fn done(Val) -> Thunk
+
+pub fn extract(Deriv) -> Code
+
+pub fn is_neutral(Tm) -> Bool
+
+pub fn is_normal(Tm) -> Bool
+
+pub fn map_tm(Tm, (Tm, Int32) -> Tm) -> Tm
+
+pub fn numeral(Int32) -> Tm
+
+pub fn parse(String) -> Raw raise KernelError
+
+pub fn shift_tm(Tm, Int32, Int32) -> Tm
+
+pub fn show_tm(Tm) -> String
+
+pub fn show_tm_at(Tm, Int32) -> String
+
+pub fn subst_tm(Tm, Int32, Tm) -> Tm
+
+pub fn tm_size(Tm) -> Int32
+
+// Errors
+pub suberror KernelError {
+  Stuck(String)
+  Unbound(Int32)
+  Expected(String, String)
+  Mismatch(String, String, String)
+  CannotInfer(String)
+  Parse(String)
+  Scope(String)
+  Fuel(Int32)
+}
+pub fn KernelError::message(Self) -> String
+
+// Types and methods
+pub(all) struct Cell {
+  mut s : MSusp
+}
+
+pub(all) struct Clos {
+  env : Env
+  body : Tm
+}
+
+#derive(Eq)
+pub(all) enum Code {
+  CVar(Int32)
+  CLam(Code)
+  CApp(Code, Code)
+  CPair(Code, Code)
+  CFst(Code)
+  CSnd(Code)
+  CStar
+  CTt
+  CFf
+  CIf(Code, Code, Code)
+  CZero
+  CSucc(Code)
+  CRec(Code, Code, Code)
+  CRefl(Code)
+  CJ(Code, Code)
+  CAbsurd(Code)
+  CBox
+}
+pub fn Code::equal(Self, Self) -> Bool
+pub fn Code::not_equal(Self, Self) -> Bool
+
+pub(all) struct Ctx {
+  lvl : Int32
+  env : Env
+  types : Types
+}
+pub fn Ctx::bind(Self, Val) -> Self
+pub fn Ctx::bind_def(Self, Val, Thunk) -> Self
+pub fn Ctx::empty() -> Self
+pub fn Ctx::fresh(Self) -> Thunk
+pub fn Ctx::type_of_index(Self, Int32) -> Val raise KernelError
+
+pub(all) struct Deriv {
+  rule : Rule
+  tm : Tm
+  ty : Val
+  premises : Array[Deriv]
+}
+pub fn Deriv::class_counts(Self) -> (Int32, Int32, Int32, Int32)
+pub fn Deriv::size(Self) -> Int32
+
+pub(all) struct Elaborated {
+  term : Tm
+  ty : Tm
+  deriv : Deriv
+}
+
+pub(all) enum Env {
+  Nil
+  Cons(Thunk, Env)
+}
+
+pub(all) struct Kernel {
+  mut beta : Int32
+  mut iota : Int32
+  mut eta : Int32
+  mut eta_unit : Int32
+  mut thunks : Int32
+  mut forced : Int32
+  mut shared : Int32
+  mut conv_fast : Int32
+  mut conv_typed : Int32
+  mut conv_physical : Int32
+}
+pub fn Kernel::apply(Self, Val, Thunk) -> Val raise KernelError
+pub fn Kernel::check(Self, Ctx, Tm, Val) -> Deriv raise KernelError
+pub fn Kernel::conv(Self, Int32, Val, Val) -> Bool raise KernelError
+pub fn Kernel::conv_ty(Self, Ctx, Val, Val) -> Bool raise KernelError
+pub fn Kernel::conv_typed(Self, Ctx, Val, Val, Val) -> Bool raise KernelError
+pub fn Kernel::convertible(Self, Ctx, Tm, Tm) -> Bool raise KernelError
+pub fn Kernel::convertible_untyped(Self, Ctx, Tm, Tm) -> Bool raise KernelError
+pub fn Kernel::delay(Self, Env, Tm) -> Thunk raise KernelError
+pub fn Kernel::elaborate(Self, String) -> Elaborated raise KernelError
+pub fn Kernel::eval(Self, Env, Tm) -> Val raise KernelError
+pub fn Kernel::force(Self, Thunk) -> Val raise KernelError
+pub fn Kernel::infer(Self, Ctx, Tm) -> Deriv raise KernelError
+pub fn Kernel::infer_type(Self, Ctx, Tm) -> (Deriv, Int32) raise KernelError
+pub fn Kernel::inst(Self, Clos, Thunk) -> Val raise KernelError
+pub fn Kernel::natrec(Self, Clos, Thunk, Clos, Val) -> Val raise KernelError
+pub fn Kernel::new() -> Self
+pub fn Kernel::normalize(Self, Ctx, Tm) -> (Tm, Tm) raise KernelError
+pub fn Kernel::quote_ne(Self, Ctx, Neu) -> (Tm, Val) raise KernelError
+pub fn Kernel::quote_nf(Self, Ctx, Val, Val) -> Tm raise KernelError
+pub fn Kernel::quote_ty(Self, Ctx, Val) -> Tm raise KernelError
+pub fn Kernel::sub_ty(Self, Ctx, Val, Val) -> Bool raise KernelError
+pub fn Kernel::vfst(Self, Val) -> Val raise KernelError
+pub fn Kernel::vsnd(Self, Val) -> Val raise KernelError
+
+pub(all) enum MEnv {
+  MNil
+  MCons(Cell, MEnv)
+}
+
+pub(all) enum MSusp {
+  MDone(MVal)
+  MDelay(Code, MEnv)
+  MRecIH(Code, Code, MEnv, Cell)
+  MBlackhole
+}
+
+pub(all) enum MVal {
+  MLam(Code, MEnv)
+  MPair(Cell, Cell)
+  MStar
+  MTt
+  MFf
+  MZero
+  MSucc(Cell)
+  MRefl(Cell)
+  MBox
+}
+
+pub(all) struct Machine {
+  mut steps : Int32
+  mut allocs : Int32
+  mut updates : Int32
+  mut max_stack : Int32
+  fuel : Int32
+}
+pub fn Machine::force(Self, Cell) -> MVal raise KernelError
+pub fn Machine::new(fuel~ : Int32) -> Self
+pub fn Machine::read_nat(Self, MVal) -> Int32 raise KernelError
+pub fn Machine::readback(Self, MVal) -> String raise KernelError
+pub fn Machine::run(Self, Code) -> MVal raise KernelError
+
+pub(all) enum Neu {
+  NVar(Int32)
+  NApp(Neu, Thunk)
+  NFst(Neu)
+  NSnd(Neu)
+  NAbsurd(Thunk, Neu)
+  NIf(Clos, Neu, Thunk, Thunk)
+  NNatRec(Clos, Thunk, Clos, Neu)
+  NJ(Clos, Clos, Neu)
+}
+
+pub(all) enum Raw {
+  SVar(String)
+  SUniv(Int32)
+  SPi(String, Raw, Raw)
+  SLam(String, Raw?, Raw)
+  SApp(Raw, Raw)
+  SSigma(String, Raw, Raw)
+  SPair(Raw, Raw)
+  SFst(Raw)
+  SSnd(Raw)
+  SUnit
+  SStar
+  SEmpty
+  SAbsurd(Raw)
+  SBool
+  STt
+  SFf
+  SIf(Raw, Raw, Raw)
+  SIfAs(String, Raw, Raw, Raw, Raw)
+  SNat
+  SLit(Int32)
+  SSucc(Raw)
+  SRec(String, Raw, Raw, String, String, Raw, Raw)
+  SId(Raw, Raw, Raw)
+  SRefl
+  SReflOf(Raw)
+  SJ(String, String, String, Raw, String, Raw, Raw)
+  SThe(Raw, Raw)
+  SLet(String, Raw, Raw, Raw)
+}
+
+#derive(Eq)
+pub(all) enum Rule {
+  Hyp
+  UnivF
+  PiF
+  PiI
+  PiE
+  SigmaF
+  SigmaI
+  SigmaE1
+  SigmaE2
+  UnitF
+  UnitI
+  EmptyF
+  EmptyE
+  BoolF
+  BoolI
+  BoolE
+  NatF
+  NatI
+  NatE
+  IdF
+  IdI
+  IdE
+  Conv
+}
+pub fn Rule::class(Self) -> RuleClass
+pub fn Rule::equal(Self, Self) -> Bool
+pub fn Rule::name(Self) -> String
+pub fn Rule::not_equal(Self, Self) -> Bool
+
+#derive(Eq)
+pub(all) enum RuleClass {
+  Formation
+  Introduction
+  Elimination
+  Structural
+}
+pub fn RuleClass::equal(Self, Self) -> Bool
+pub fn RuleClass::not_equal(Self, Self) -> Bool
+
+pub(all) enum Susp {
+  Done(Val)
+  Delay(Env, Tm)
+  RecIH(Clos, Thunk, Clos, Thunk)
+}
+
+pub(all) struct Thunk {
+  mut s : Susp
+}
+
+#derive(Eq)
+pub(all) enum Tm {
+  Var(Int32)
+  Univ(Int32)
+  Pi(Tm, Tm)
+  Lam(Tm, Tm)
+  App(Tm, Tm)
+  Sigma(Tm, Tm)
+  Pair(Tm, Tm, Tm)
+  Fst(Tm)
+  Snd(Tm)
+  UnitTy
+  Star
+  EmptyTy
+  Absurd(Tm, Tm)
+  BoolTy
+  Tt
+  Ff
+  If(Tm, Tm, Tm, Tm)
+  NatTy
+  Zero
+  Succ(Tm)
+  NatRec(Tm, Tm, Tm, Tm)
+  IdTy(Tm, Tm, Tm)
+  Refl(Tm)
+  J(Tm, Tm, Tm)
+}
+pub fn Tm::equal(Self, Self) -> Bool
+pub fn Tm::not_equal(Self, Self) -> Bool
+
+pub(all) enum Types {
+  TNil
+  TCons(Val, Types)
+}
+
+pub(all) enum Val {
+  VNe(Neu)
+  VUniv(Int32)
+  VPi(Thunk, Clos)
+  VLam(Thunk, Clos)
+  VSigma(Thunk, Clos)
+  VPair(Thunk, Thunk, Clos)
+  VUnitTy
+  VStar
+  VEmptyTy
+  VBoolTy
+  VTt
+  VFf
+  VNatTy
+  VZero
+  VSucc(Thunk)
+  VIdTy(Thunk, Thunk, Thunk)
+  VRefl(Thunk)
+}
+
+// Type aliases
+
+// Traits

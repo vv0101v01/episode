@@ -1,0 +1,133 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dtt03/h2_beta_eta_sn"
+
+// Values
+pub fn children(Node) -> Array[(Int32, Int32)]
+
+pub fn map_children(Node, (Int32, Int32) -> Int32) -> Node
+
+pub fn with_child(Node, Int32, Int32) -> Node
+
+// Errors
+
+// Types and methods
+pub(all) struct Arena {
+  nodes : Array[Node]
+  table : Map[Node, Int32]
+  fv : Array[UInt64]
+  flags : Array[Int32]
+  size : Array[Int32]
+  shift_memo : Map[(Int32, Int32, Int32), Int32]
+  subst_memo : Map[(Int32, Int32, Int32), Int32]
+  reducts_beta : Map[Int32, Array[Int32]]
+  reducts_beta_eta : Map[Int32, Array[Int32]]
+  cd_memo : Map[Int32, Int32]
+  mut hits : Int32
+  mut fast_paths : Int32
+  mut contractions : Int32
+}
+pub fn Arena::app(Self, Int32, Int32) -> Int32
+pub fn Arena::as_numeral(Self, Int32) -> Int32?
+pub fn Arena::church(Self, Int32, Int32) -> Int32
+pub fn Arena::church_rosser_join(Self, Int32, Int32, fuel~ : Int32) -> Join?
+pub fn Arena::complete_development(Self, Int32) -> Int32
+pub fn Arena::contract_head(Self, Int32) -> Int32?
+pub fn Arena::dag_size(Self, Int32) -> Int32
+pub fn Arena::eta_head(Self, Int32) -> Int32?
+pub fn Arena::eta_normalize(Self, Int32) -> (Int32, Int32)
+pub fn Arena::has_beta(Self, Int32) -> Bool
+pub fn Arena::has_eta(Self, Int32) -> Bool
+pub fn Arena::is_beta_normal(Self, Int32) -> Bool
+pub fn Arena::is_closed(Self, Int32) -> Bool
+pub fn Arena::lam(Self, Int32, Int32) -> Int32
+pub fn Arena::local_confluence_defect(Self, Int32, eta~ : Bool, budget~ : Int32) -> (Int32, Int32)?
+pub fn Arena::mk(Self, Node) -> Int32
+pub fn Arena::new() -> Self
+pub fn Arena::node(Self, Int32) -> Node
+pub fn Arena::numeral(Self, Int32) -> Int32
+pub fn Arena::occurs(Self, Int32, Int32) -> Bool
+pub fn Arena::reachable(Self, Int32, Int32, budget~ : Int32) -> Bool
+pub fn Arena::reducts(Self, Int32, eta~ : Bool) -> Array[Int32]
+pub fn Arena::run_gross_knuth(Self, Int32, fuel~ : Int32) -> Run
+pub fn Arena::run_leftmost(Self, Int32, fuel~ : Int32) -> Run
+pub fn Arena::run_perpetual(Self, Int32, fuel~ : Int32) -> Run
+pub fn Arena::shift(Self, Int32, Int32, Int32) -> Int32
+pub fn Arena::show(Self, Int32) -> String
+pub fn Arena::sn_certificate(Self, Int32, eta~ : Bool, budget~ : Int32) -> SnCert
+pub fn Arena::step_leftmost(Self, Int32) -> Int32?
+pub fn Arena::step_perpetual(Self, Int32) -> Int32?
+pub fn Arena::subst(Self, Int32, Int32, Int32) -> Int32
+pub fn Arena::tree_size(Self, Int32) -> Int32
+pub fn Arena::verify_z_property(Self, Int32, budget~ : Int32) -> ZReport
+
+pub(all) struct Join {
+  common : Int32
+  left_rounds : Int32
+  right_rounds : Int32
+}
+
+#derive(Eq, Hash)
+pub(all) enum Node {
+  Var(Int32)
+  Univ(Int32)
+  Pi(Int32, Int32)
+  Lam(Int32, Int32)
+  App(Int32, Int32)
+  Sigma(Int32, Int32)
+  Pair(Int32, Int32, Int32)
+  Fst(Int32)
+  Snd(Int32)
+  UnitTy
+  Star
+  EmptyTy
+  Absurd(Int32, Int32)
+  BoolTy
+  Tt
+  Ff
+  If(Int32, Int32, Int32, Int32)
+  NatTy
+  Zero
+  Succ(Int32)
+  NatRec(Int32, Int32, Int32, Int32)
+  IdTy(Int32, Int32, Int32)
+  Refl(Int32)
+  J(Int32, Int32, Int32)
+}
+pub fn Node::equal(Self, Self) -> Bool
+pub fn Node::hash(Self) -> Int32
+pub fn Node::hash_combine(Self, Hasher) -> Unit
+pub fn Node::not_equal(Self, Self) -> Bool
+
+pub(all) struct Run {
+  result : Int32
+  steps : Int32
+  normal : Bool
+}
+
+pub(all) struct SnCert {
+  verdict : SnVerdict
+  nodes : Int32
+  edges : Int32
+  longest : Int32
+  shortest : Int32
+  normal_forms : Array[Int32]
+  cycle : Array[Int32]
+}
+
+#derive(Eq)
+pub(all) enum SnVerdict {
+  StronglyNormalizing
+  Cyclic
+  BudgetExceeded
+}
+pub fn SnVerdict::equal(Self, Self) -> Bool
+pub fn SnVerdict::not_equal(Self, Self) -> Bool
+
+pub(all) struct ZReport {
+  pairs : Int32
+  holds : Bool
+}
+
+// Type aliases
+
+// Traits

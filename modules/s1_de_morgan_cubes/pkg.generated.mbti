@@ -1,0 +1,87 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dtt03/s1_de_morgan_cubes"
+
+// Values
+pub const MAX_NAMES : Int32 = 15
+
+pub fn complement_report(Array[Dm]) -> ComplementReport
+
+pub fn count_sieves(Int32) -> Int32
+
+pub fn face_lattice(Int32, limit~ : Int32) -> Array[Face]
+
+pub fn free_algebra(Int32, limit~ : Int32) -> Array[Dm]
+
+pub fn relative_complement(Array[Dm], Dm, Dm, Dm) -> Dm?
+
+pub fn semantically_equal4(Dm, Dm, Int32) -> (Bool, Int32)
+
+pub fn verify_cubical_identities(Int32) -> (Int32, Bool)
+
+pub fn verify_de_morgan_laws(Array[Dm]) -> (Int32, Bool)
+
+pub fn verify_face_semantics(Int32, Array[Dm]) -> (Int32, Int32, Bool)
+
+// Errors
+
+// Types and methods
+pub(all) struct ComplementReport {
+  size : Int32
+  center : Int32
+  intervals : Int32
+  boolean_intervals : Int32
+  largest_boolean : Int32
+  neg_fixed_points : Int32
+  kleene_violations : Int32
+}
+
+pub(all) struct CubeMap {
+  dom : Int32
+  images : Array[Dm]
+}
+pub fn CubeMap::act(Self, Dm) -> Dm
+pub fn CubeMap::connection(Int32, Int32, meet~ : Bool) -> Self
+pub fn CubeMap::degeneracy(Int32, Int32) -> Self
+pub fn CubeMap::face(Int32, Int32, one~ : Bool) -> Self
+pub fn CubeMap::identity(Int32) -> Self
+pub fn CubeMap::reversal(Int32, Int32) -> Self
+pub fn CubeMap::same(Self, Self) -> Bool
+pub fn CubeMap::then(Self, Self) -> Self
+
+pub(all) struct Dm {
+  ms : Array[Int32]
+}
+pub fn Dm::co_name(Int32) -> Self
+pub fn Dm::eq_one(Self) -> Face
+pub fn Dm::eq_zero(Self) -> Face
+pub fn Dm::eval4(Self, Int32) -> Int32
+pub fn Dm::face(Self, Int32, one~ : Bool) -> Self
+pub fn Dm::is_one(Self) -> Bool
+pub fn Dm::is_zero(Self) -> Bool
+pub fn Dm::join(Self, Self) -> Self
+pub fn Dm::leq(Self, Self) -> Bool
+pub fn Dm::meet(Self, Self) -> Self
+pub fn Dm::name(Int32) -> Self
+pub fn Dm::neg(Self) -> Self
+pub fn Dm::one() -> Self
+pub fn Dm::same(Self, Self) -> Bool
+pub fn Dm::show(Self) -> String
+pub fn Dm::subst(Self, (Int32) -> Self) -> Self
+pub fn Dm::support(Self) -> Int32
+pub fn Dm::zero() -> Self
+
+pub(all) struct Face {
+  fs : Array[Int32]
+}
+pub fn Face::bot() -> Self
+pub fn Face::eq(Int32, one~ : Bool) -> Self
+pub fn Face::join(Self, Self) -> Self
+pub fn Face::leq(Self, Self) -> Bool
+pub fn Face::meet(Self, Self) -> Self
+pub fn Face::same(Self, Self) -> Bool
+pub fn Face::sieve(Self, Int32) -> Array[Bool]
+pub fn Face::top() -> Self
+
+// Type aliases
+
+// Traits

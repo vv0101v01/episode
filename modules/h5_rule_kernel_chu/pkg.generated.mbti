@@ -1,0 +1,52 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dtt03/h5_rule_kernel_chu"
+
+import {
+  "dtt03/h1_rule_harmony",
+  "dtt03/h3_nbe_typecheck",
+}
+
+// Values
+pub fn rule_cases() -> Array[RuleCase]
+
+pub fn verify_all(@h3_nbe_typecheck.Kernel) -> Array[FormerReport]
+
+pub fn verify_chu_duality(@h3_nbe_typecheck.Kernel) -> ChuReport
+
+pub fn verify_former(@h3_nbe_typecheck.Kernel, @h1_rule_harmony.Connective, RuleCase) -> FormerReport
+
+// Errors
+
+// Types and methods
+pub(all) struct ChuReport {
+  intros : Int32
+  elims : Int32
+  matrices_agree : Bool
+  fired_cells : Int32
+  concepts : Int32
+  formers_are_concepts : Bool
+  galois_pairs : Int32
+  galois_holds : Bool
+}
+
+pub(all) struct FormerReport {
+  former : String
+  polarity : @h1_rule_harmony.Polarity
+  predicted_rules : Int32
+  verified_rules : Int32
+  definitional_eta : Bool
+  propositional_eta : Bool
+  consistent : Bool
+}
+
+pub(all) struct RuleCase {
+  former : String
+  computation : Array[(String, String)]
+  eta_statement : String
+  eta_by_refl : String
+  eta_by_elim : String
+}
+
+// Type aliases
+
+// Traits

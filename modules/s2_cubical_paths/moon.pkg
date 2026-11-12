@@ -1,0 +1,3 @@
+import {
+  "dtt03/s1_de_morgan_cubes" @s1,
+}

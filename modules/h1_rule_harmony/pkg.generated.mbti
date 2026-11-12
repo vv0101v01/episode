@@ -1,0 +1,96 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dtt03/h1_rule_harmony"
+
+// Values
+pub const A : Int32 = 0
+
+pub const B : Int32 = 1
+
+pub const EQ : Int32 = 2
+
+pub const PARAM : Int32 = 63
+
+pub const SELF : Int32 = 62
+
+pub fn bit(Int32) -> UInt64
+
+pub fn elim_closure(Array[ElimRule], UInt64, Array[(UInt64, Int32)], UInt64) -> UInt64
+
+pub fn elims_generate(Array[ElimRule], ElimRule, UInt64) -> Bool
+
+pub fn horn_closure(UInt64, Array[(UInt64, Int32)]) -> UInt64
+
+pub fn locally_sound(IntroRule, ElimRule) -> Bool
+
+pub fn logical_connectives() -> Array[Connective]
+
+pub fn type_formers() -> Array[Connective]
+
+pub fn universe_of(Array[Connective]) -> RuleUniverse
+
+// Errors
+
+// Types and methods
+pub(all) struct Connective {
+  name : String
+  intros : Array[IntroRule]
+  elims : Array[ElimRule]
+  judgmental : UInt64
+}
+pub fn Connective::atoms(Self) -> UInt64
+pub fn Connective::computation_rule_names(Self) -> Array[String]
+pub fn Connective::derive_general_elim(Self) -> ElimRule
+pub fn Connective::harmony(Self) -> Harmony
+pub fn Connective::negative_expansion(Self) -> Bool
+pub fn Connective::positive_expansion(Self) -> Bool
+pub fn Connective::with_general_elim(Self) -> Self
+
+pub(all) struct ElimRule {
+  name : String
+  minors : Array[Prem]
+  concl : Int32
+}
+
+pub(all) struct Harmony {
+  sound : Bool
+  complete : Bool
+  polarity : Polarity
+  computation_rules : Int32
+}
+
+pub(all) struct IntroRule {
+  name : String
+  premises : Array[Prem]
+}
+
+#derive(Eq)
+pub(all) enum Polarity {
+  Negative
+  Positive
+  NoUniqueness
+}
+pub fn Polarity::equal(Self, Self) -> Bool
+pub fn Polarity::not_equal(Self, Self) -> Bool
+
+pub(all) enum Prem {
+  Plain(Int32)
+  Hypo(UInt64, Int32)
+}
+
+pub(all) struct RuleUniverse {
+  intros : Array[IntroRule]
+  elims : Array[ElimRule]
+  rows : Array[UInt64]
+  cols : Array[UInt64]
+}
+pub fn RuleUniverse::concepts(Self) -> Array[(UInt64, UInt64)]
+pub fn RuleUniverse::from_matrix(Array[IntroRule], Array[ElimRule], Array[UInt64]) -> Self
+pub fn RuleUniverse::left_polar(Self, UInt64) -> UInt64
+pub fn RuleUniverse::new(Array[IntroRule], Array[ElimRule]) -> Self
+pub fn RuleUniverse::right_polar(Self, UInt64) -> UInt64
+pub fn RuleUniverse::stability(Self, Connective) -> (Int32, Bool)
+pub fn RuleUniverse::verify_galois_law(Self) -> (Int32, Bool)
+
+// Type aliases
+
+// Traits

@@ -1,0 +1,121 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dtt03/s6_deformation_derived"
+
+// Values
+pub const P : Int32 = 32003
+
+pub fn abelian(Int32) -> Array[Array[Array[Int32]]]
+
+pub fn derived_fiber_product(Cochain, Cochain, Cochain, Array[Matrix], Array[Matrix]) -> Cochain
+
+pub fn heisenberg_dgla(Array[Array[Array[Int32]]]) -> Dgla
+
+pub fn inv(Int32) -> Int32
+
+pub fn is_chain_map(Cochain, Cochain, Array[Matrix]) -> Bool
+
+pub fn md(Int32) -> Int32
+
+pub fn mul(Int32, Int32) -> Int32
+
+pub fn sl2() -> Array[Array[Array[Int32]]]
+
+pub fn span_rank(Int32, Array[Array[Int32]]) -> Int32
+
+pub fn strict_fiber_product_betti(Cochain, Cochain, Cochain, Array[Matrix], Array[Matrix]) -> Array[Int32]
+
+pub fn torus_dgla(Array[Array[Array[Int32]]]) -> Dgla
+
+pub fn vec_add(Array[Int32], Array[Int32]) -> Array[Int32]
+
+pub fn vec_is_zero(Array[Int32]) -> Bool
+
+pub fn vec_scale(Int32, Array[Int32]) -> Array[Int32]
+
+pub fn verify_mayer_vietoris(Cochain, Cochain, Cochain, Array[Matrix], Array[Matrix]) -> (Array[Int32], Array[Int32], Bool)
+
+pub fn verify_tangent_fiber_product(Array[Array[Array[Int32]]], Array[Int32], Array[Int32]) -> ((Int32, Int32), (Int32, Int32), Bool)
+
+// Errors
+
+// Types and methods
+pub(all) struct Cochain {
+  dims : Array[Int32]
+  d : Array[Matrix]
+}
+pub fn Cochain::betti(Self) -> Array[Int32]
+pub fn Cochain::euler(Self) -> Int32
+pub fn Cochain::is_complex(Self) -> Bool
+
+pub(all) struct DeformationReport {
+  h0 : Int32
+  h1 : Int32
+  h2 : Int32
+  kuranishi_nonzero : Int32
+  kuranishi_trials : Int32
+  axioms : Bool
+}
+
+pub(all) struct Dgla {
+  name : String
+  g : Int32
+  lie : Array[Array[Array[Int32]]]
+  m : Int32
+  dgen : Array[Array[(Int32, Int32)]]
+}
+pub fn Dgla::bracket(Self, Array[Int32], Array[Int32]) -> Array[Int32]
+pub fn Dgla::cochain(Self, Array[Int32]?) -> Cochain
+pub fn Dgla::curvature(Self, Array[Int32]) -> Array[Int32]
+pub fn Dgla::d(Self, Array[Int32]) -> Array[Int32]
+pub fn Dgla::deformation_report(Self, Int32) -> DeformationReport
+pub fn Dgla::degree_indices(Self, Int32) -> Array[Int32]
+pub fn Dgla::dim(Self) -> Int32
+pub fn Dgla::is_maurer_cartan(Self, Array[Int32]) -> Bool
+pub fn Dgla::moduli_tower(Self, Array[Int32], Int32) -> Tower
+pub fn Dgla::random_element(Self, Int32, Int32) -> Array[Int32]
+pub fn Dgla::verify_axioms(Self) -> DglaAxioms
+
+pub(all) struct DglaAxioms {
+  d_squared_zero : Bool
+  antisymmetry : Bool
+  jacobi : Bool
+  leibniz : Bool
+  bianchi : Bool
+  twisted_square_is_curvature : Bool
+  gauge_covariance : Bool
+  checks : Int32
+}
+pub fn DglaAxioms::all(Self) -> Bool
+
+pub(all) struct Level {
+  order : Int32
+  obstruction_closed : Bool
+  obstruction_exact : Bool
+  refined_liftable : Bool
+  torsor_dim : Int32
+}
+
+pub(all) struct Matrix {
+  rows : Int32
+  cols : Int32
+  data : Array[Array[Int32]]
+}
+pub fn Matrix::apply(Self, Array[Int32]) -> Array[Int32]
+pub fn Matrix::compose(Self, Self) -> Self
+pub fn Matrix::from_columns(Int32, Array[Array[Int32]]) -> Self
+pub fn Matrix::is_zero(Self) -> Bool
+pub fn Matrix::kernel(Self) -> Array[Array[Int32]]
+pub fn Matrix::rank(Self) -> Int32
+pub fn Matrix::solve(Self, Array[Int32]) -> Array[Int32]?
+pub fn Matrix::zero(Int32, Int32) -> Self
+
+pub(all) struct Tower {
+  coeffs : Array[Array[Int32]]
+  levels : Array[Level]
+  obstructed_at : Int32
+  truncations_mc : Bool
+}
+
+// Type aliases
+
+// Traits

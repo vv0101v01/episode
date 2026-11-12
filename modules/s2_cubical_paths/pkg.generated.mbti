@@ -1,0 +1,165 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dtt03/s2_cubical_paths"
+
+import {
+  "dtt03/s1_de_morgan_cubes",
+}
+
+// Values
+pub fn ap(Int32, Tm, Tm) -> Tm
+
+pub fn connection_square(Int32, Int32, Tm, meet~ : Bool) -> Tm
+
+pub fn dim(Int32) -> @s1_de_morgan_cubes.Dm
+
+pub fn funext(Int32, Tm) -> Tm
+
+pub fn happly(Int32, Tm) -> Tm
+
+pub fn path_ty(Int32, Ty, Tm, Tm) -> Ty
+
+pub fn refl(Int32, Tm) -> Tm
+
+pub fn show_tm(Tm) -> String
+
+pub fn show_ty(Ty) -> String
+
+pub fn standard_theory() -> Theory raise CubicalError
+
+pub fn sym(Int32, Tm) -> Tm
+
+pub fn tm_equal(Tm, Tm) -> Bool
+
+pub fn ty_equal(Ty, Ty) -> Bool
+
+pub fn verify_path_laws() -> PathLaws raise CubicalError
+
+// Errors
+pub suberror CubicalError {
+  Ill(String)
+}
+pub fn CubicalError::message(Self) -> String
+
+// Types and methods
+pub(all) struct Ctx {
+  lvl : Int32
+  dlvl : Int32
+  env : Env
+  types : Array[VTy]
+}
+pub fn Ctx::bind(Self, VTy) -> Self
+pub fn Ctx::bind_dim(Self, Int32) -> Self raise CubicalError
+pub fn Ctx::empty() -> Self
+
+pub(all) enum DEnv {
+  DNil
+  DCons(Int32, @s1_de_morgan_cubes.Dm, DEnv)
+}
+
+pub(all) struct Env {
+  tms : TEnv
+  dims : DEnv
+}
+pub fn Env::bind_dim(Self, Int32, @s1_de_morgan_cubes.Dm) -> Self
+pub fn Env::empty() -> Self
+pub fn Env::push(Self, Val) -> Self
+
+pub(all) enum Neu {
+  NVar(Int32, VTy)
+  NConst(String, VTy)
+  NApp(Neu, Val)
+  NPApp(Neu, @s1_de_morgan_cubes.Dm)
+}
+
+pub(all) struct PathLaws {
+  sym_involution : Bool
+  sym_refl : Bool
+  ap_id : Bool
+  ap_compose : Bool
+  ap_refl : Bool
+  ap_sym : Bool
+  path_eta : Bool
+  funext_typed : Bool
+  funext_roundtrip : Bool
+  happly_roundtrip : Bool
+  meet_square_typed : Bool
+  join_square_typed : Bool
+  square_diagonal : Bool
+  de_morgan_square : Bool
+  surf_transpose_typed : Bool
+  surf_boundary : Bool
+  rejects_wrong_endpoint : Bool
+  rejects_sym_as_same : Bool
+  beta : Int32
+  path_beta : Int32
+  boundary : Int32
+  eta_expansions : Int32
+}
+pub fn PathLaws::all(Self) -> Bool
+
+pub(all) enum TEnv {
+  TNil
+  TCons(Val, TEnv)
+}
+
+pub(all) struct Theory {
+  bases : Map[String, Bool]
+  consts : Map[String, VTy]
+  mut beta : Int32
+  mut path_beta : Int32
+  mut boundary : Int32
+  mut eta : Int32
+  mut path_eta : Int32
+}
+pub fn Theory::accepts(Self, Tm, Ty) -> (Bool, String)
+pub fn Theory::add_const(Self, String, Ty) -> Unit raise CubicalError
+pub fn Theory::apply(Self, Val, Val) -> Val raise CubicalError
+pub fn Theory::check(Self, Ctx, Tm, VTy) -> Unit raise CubicalError
+pub fn Theory::check_ty(Self, Ctx, Ty) -> Unit raise CubicalError
+pub fn Theory::conv(Self, Int32, Int32, VTy, Val, Val) -> Bool raise CubicalError
+pub fn Theory::conv_ty(Self, Int32, Int32, VTy, VTy) -> Bool raise CubicalError
+pub fn Theory::declare_base(Self, String) -> Unit
+pub fn Theory::definitionally_equal(Self, Tm, Tm, Ty) -> Bool raise CubicalError
+pub fn Theory::eval(Self, Env, Tm) -> Val raise CubicalError
+pub fn Theory::eval_dim(Self, Env, @s1_de_morgan_cubes.Dm) -> @s1_de_morgan_cubes.Dm
+pub fn Theory::eval_ty(Self, Env, Ty) -> VTy raise CubicalError
+pub fn Theory::infer(Self, Ctx, Tm) -> VTy raise CubicalError
+pub fn Theory::new() -> Self
+pub fn Theory::normalize(Self, Tm, Ty) -> Tm raise CubicalError
+pub fn Theory::papp(Self, Val, @s1_de_morgan_cubes.Dm) -> Val raise CubicalError
+pub fn Theory::readback(Self, Int32, Int32, VTy, Val) -> Tm raise CubicalError
+pub fn Theory::readback_neu(Self, Int32, Int32, Neu) -> Tm raise CubicalError
+pub fn Theory::readback_ty(Self, Int32, Int32, VTy) -> Ty raise CubicalError
+pub fn Theory::type_of_neu(Self, Neu) -> VTy raise CubicalError
+
+pub(all) enum Tm {
+  Var(Int32)
+  Const(String)
+  Lam(Tm)
+  App(Tm, Tm)
+  PLam(Int32, Tm)
+  PApp(Tm, @s1_de_morgan_cubes.Dm)
+  Ann(Tm, Ty)
+}
+
+pub(all) enum Ty {
+  TBase(String)
+  TPi(Ty, Ty)
+  TPathP(Int32, Ty, Tm, Tm)
+}
+
+pub(all) enum VTy {
+  VBase(String)
+  VPi(VTy, Env, Ty)
+  VPathP(Env, Int32, Ty, Val, Val)
+}
+
+pub(all) enum Val {
+  VLam(Env, Tm)
+  VPLam(Env, Int32, Tm)
+  VNe(Neu)
+}
+
+// Type aliases
+
+// Traits

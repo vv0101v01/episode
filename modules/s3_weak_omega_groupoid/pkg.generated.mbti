@@ -1,0 +1,102 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dtt03/s3_weak_omega_groupoid"
+
+// Values
+pub fn boundary_vars(Array[Ty], Int32) -> (Int64, Int64)
+
+pub fn ctx_dim(Array[Ty]) -> Int32
+
+pub fn fv_tm(Tm) -> Int64
+
+pub fn fv_ty(Ty) -> Int64
+
+pub fn globular_contexts(Int32) -> Array[Array[Ty]]
+
+pub fn is_pasting_scheme(Array[Ty]) -> Bool
+
+pub fn subst_tm(Tm, Array[Tm]) -> Tm
+
+pub fn subst_ty(Ty, Array[Tm]) -> Ty
+
+pub fn tm_equal(Tm, Tm) -> Bool
+
+pub fn triangle_order_is_linear(Array[Ty]) -> Bool
+
+pub fn ty_equal(Ty, Ty) -> Bool
+
+pub fn verify_group_model(Library, FinGroup) -> (Int32, Int32, Bool) raise CattError
+
+pub fn verify_ps_characterization(Int32) -> (Int32, Int32, Bool)
+
+pub fn verify_rejections() -> (Int32, Int32)
+
+// Errors
+pub suberror CattError {
+  Reject(String)
+}
+pub fn CattError::message(Self) -> String
+
+// Types and methods
+pub(all) struct Coherence {
+  name : String
+  ps : Array[Ty]
+  ty : Ty
+  kind : String
+}
+
+pub(all) struct FinGroup {
+  mul : Array[Array[Int32]]
+  inv : Array[Int32]
+}
+pub fn FinGroup::cyclic(Int32) -> Self
+pub fn FinGroup::from_table(Array[Array[Int32]]) -> Self
+pub fn FinGroup::order(Self) -> Int32
+pub fn FinGroup::symmetric3() -> Self
+
+pub(all) struct Library {
+  theory : Theory
+  id : Int32
+  comp : Int32
+  assoc : Int32
+  unit_l : Int32
+  unit_r : Int32
+  vcomp : Int32
+  hcomp : Int32
+  id2 : Int32
+  interchange : Int32
+  inv : Int32
+  inv_r : Int32
+  inv_l : Int32
+}
+pub fn Library::build(groupoid~ : Bool) -> Self raise CattError
+
+pub(all) struct Theory {
+  groupoid : Bool
+  cohs : Array[Coherence]
+  mut checks : Int32
+}
+pub fn Theory::add_coherence(Self, String, Array[Ty], Ty) -> Int32 raise CattError
+pub fn Theory::check_ctx(Self, Array[Ty]) -> Unit raise CattError
+pub fn Theory::check_sub(Self, Array[Ty], Array[Tm], Array[Ty]) -> Unit raise CattError
+pub fn Theory::check_tm(Self, Array[Ty], Tm, Ty) -> Unit raise CattError
+pub fn Theory::check_ty(Self, Array[Ty], Ty) -> Unit raise CattError
+pub fn Theory::eval1(Self, FinGroup, Array[Int32], Tm) -> Int32 raise CattError
+pub fn Theory::infer(Self, Array[Ty], Tm) -> Ty raise CattError
+pub fn Theory::new(groupoid~ : Bool) -> Self
+pub fn Theory::show_tm(Self, Tm) -> String
+pub fn Theory::show_ty(Self, Ty) -> String
+
+pub(all) enum Tm {
+  Var(Int32)
+  Coh(Int32, Array[Tm])
+}
+
+pub(all) enum Ty {
+  Obj
+  Arr(Ty, Tm, Tm)
+}
+pub fn Ty::dim(Self) -> Int32
+
+// Type aliases
+
+// Traits

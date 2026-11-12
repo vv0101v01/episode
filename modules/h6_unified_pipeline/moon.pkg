@@ -1,0 +1,7 @@
+import {
+  "dtt03/h1_rule_harmony" @h1,
+  "dtt03/h2_beta_eta_sn" @h2,
+  "dtt03/h3_nbe_typecheck" @h3,
+  "dtt03/h4_reduction_localization" @h4,
+  "dtt03/h5_rule_kernel_chu" @h5,
+}
