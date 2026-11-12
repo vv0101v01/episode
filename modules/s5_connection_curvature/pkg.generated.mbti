@@ -6,6 +6,10 @@ import {
 }
 
 // Values
+pub fn associated_bundle(@s4_rewriting_cover.Complex, Array[Array[Int32]]) -> Connection?
+
+pub fn classify_covering(@s4_rewriting_cover.Complex, Array[Array[Int32]]) -> CoveringReport?
+
 pub fn components(@s4_rewriting_cover.Complex) -> Int32
 
 pub fn factorial(Int32) -> Int32
@@ -59,6 +63,17 @@ pub fn Connection::holonomy(Self, Array[Int32]) -> Array[Int32]
 pub fn Connection::horizontal(Self) -> Horizontal
 pub fn Connection::is_flat(Self, @s4_rewriting_cover.Complex) -> Bool
 pub fn Connection::total_space(Self, @s4_rewriting_cover.Complex) -> (@s4_rewriting_cover.Complex, Int32)
+
+pub(all) struct CoveringReport {
+  sheets : Int32
+  connected : Bool
+  euler_multiplicative : Bool
+  subgroup_generators : Int32
+  subgroup_relators : Int32
+  h1_rank : Int32
+  h1_torsion : Array[Int32]
+  faces_lift : Bool
+}
 
 pub(all) struct GroupoidModelReport {
   loop_space : Int32

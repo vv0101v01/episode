@@ -6,6 +6,8 @@ pub fn amalgam(Presentation, Presentation, Array[(Array[Int32], Array[Int32])]) 
 
 pub fn analyze_complex(Complex, max_rules~ : Int32, limit~ : Int32) -> CoverReport
 
+pub fn bouquet(Int32) -> Complex
+
 pub fn concat(Array[Int32], Array[Int32]) -> Array[Int32]
 
 pub fn disk_with_loop() -> Complex
@@ -33,11 +35,30 @@ pub fn torus() -> Complex
 // Errors
 
 // Types and methods
+pub(all) struct CodeFamily {
+  base : Complex
+  rws : Rws
+  label : Array[Int32]
+  tree_path : Array[Array[Int32]]
+  gen_edge : Array[Int32]
+}
+pub fn CodeFamily::ap_code(Self, Array[Int32]) -> UPath
+pub fn CodeFamily::canonical(Self, UPath) -> Array[Int32]
+pub fn CodeFamily::codes(Self, Int32) -> Array[Array[Int32]]
+pub fn CodeFamily::decode(Self, Int32, Array[Int32]) -> Array[Int32]
+pub fn CodeFamily::encode(Self, Array[Int32]) -> Array[Int32]
+pub fn CodeFamily::lift(Self, Int32, Array[Int32], Array[Int32]) -> (Int32, Array[Int32])?
+pub fn CodeFamily::transport(Self, Array[Int32], Int32) -> Array[Int32]
+pub fn CodeFamily::transport_along(Self, UPath, Array[Int32]) -> Array[Int32]
+pub fn CodeFamily::verify_encode_decode(Self, Int32, Int32) -> EncodeDecode
+pub fn CodeFamily::verify_univalence_computation(Self, Int32, Int32) -> (Int32, Bool)
+
 pub(all) struct Complex {
   nv : Int32
   edges : Array[(Int32, Int32)]
   faces : Array[Array[Int32]]
 }
+pub fn Complex::code_family(Self, max_rules~ : Int32) -> CodeFamily?
 pub fn Complex::euler(Self) -> Int32
 pub fn Complex::fundamental_group(Self) -> (Presentation, Array[Int32])
 pub fn Complex::universal_cover(Self, Rws, Array[Int32], limit~ : Int32) -> Cover
@@ -73,6 +94,16 @@ pub(all) struct CoverReport {
   h1_torsion : Array[Int32]
 }
 
+pub(all) struct EncodeDecode {
+  family_well_defined : Bool
+  encode_decode : Bool
+  decode_encode : Bool
+  codes_checked : Int32
+  paths_checked : Int32
+  window : Int32
+}
+pub fn EncodeDecode::holds(Self) -> Bool
+
 pub(all) struct Presentation {
   ngens : Int32
   relators : Array[Array[Int32]]
@@ -100,6 +131,13 @@ pub fn Rws::normal_form(Self, Array[Int32]) -> Array[Int32]
 pub fn Rws::one_step(Self, Array[Int32]) -> Array[Array[Int32]]
 pub fn Rws::verify_local_confluence(Self) -> (Int32, Bool)
 pub fn Rws::verify_unique_normal_forms(Self, Int32) -> (Int32, Bool)
+
+pub(all) enum UPath {
+  Refl
+  Ua(Array[Int32])
+  Concat(UPath, UPath)
+  Sym(UPath)
+}
 
 // Type aliases
 

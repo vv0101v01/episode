@@ -500,3 +500,84 @@ fn perm_key(p : Array[Int32]) -> String {
   }
   sb.to_string()
 }
+
+///|
+/// 纖維叢由泛覆疊導出：給定 π₁(X) 在有限集 F 上的作用（每個生成元一個置換），
+/// 伴隨叢 X̃ ×_{π₁} F 即以 F 為纖維、邊 e 的平行移動為 [e] 之作用的平坦聯絡。
+/// π₁ 本身不必有限。作用不滿足關係子（某個面的和樂非恆等）時回傳 None。
+pub fn associated_bundle(
+  x : @s4.Complex,
+  action : Array[Array[Int32]],
+) -> Connection? {
+  let (pres, label) = x.fundamental_group()
+  if action.length() != pres.ngens {
+    return None
+  }
+  let fiber = if action.length() > 0 { action[0].length() } else { 1 }
+  for perm in action {
+    if perm.length() != fiber {
+      return None
+    }
+  }
+  let tau : Array[Array[Int32]] = []
+  for e in 0..<x.edges.length() {
+    tau.push(if label[e] < 0 { perm_id(fiber) } else { action[label[e]] })
+  }
+  let conn : Connection = { fiber, tau, }
+  if conn.is_flat(x) {
+    Some(conn)
+  } else {
+    None
+  }
+}
+
+///|
+/// 一個有限葉覆疊的不變量。
+pub(all) struct CoveringReport {
+  sheets : Int32
+  /// 全空間連通（⇔ 作用可遞 ⇔ 對應 π₁ 的一個指數為 `sheets` 的子群）
+  connected : Bool
+  /// χ(E) = sheets · χ(X)
+  euler_multiplicative : Bool
+  /// 全空間基本群（即該子群）的表現：生成元數、關係子數、H₁ 的秩與撓（全空間不連通時皆為空）
+  subgroup_generators : Int32
+  subgroup_relators : Int32
+  h1_rank : Int32
+  h1_torsion : Array[Int32]
+  /// 每個面恰提升為 `sheets` 個面（平坦）
+  faces_lift : Bool
+}
+
+///|
+/// 定理（覆疊的分類）：連通的 n 葉覆疊 ↔ π₁ 在 n 元集上的可遞作用 ↔ 指數 n 的子群（共軛意義下）。
+/// 全空間以 Grothendieck 構造建出，其基本群即該子群。
+/// 推論（Nielsen–Schreier）：X 為 r 個圓的楔和時，子群為秩 1 + n(r − 1) 的自由群。
+pub fn classify_covering(
+  x : @s4.Complex,
+  action : Array[Array[Int32]],
+) -> CoveringReport? {
+  match associated_bundle(x, action) {
+    None => None
+    Some(conn) => {
+      let (total, defects) = conn.total_space(x)
+      let connected = components(total) == 1
+      // 基本群只對連通的全空間有意義；不連通時子群各欄留空
+      let (pres, _) = if connected {
+        total.fundamental_group()
+      } else {
+        ({ ngens: 0, relators: [], }, [])
+      }
+      let (rank, torsion) = pres.abelianization()
+      Some({
+        sheets: conn.fiber,
+        connected,
+        euler_multiplicative: total.euler() == conn.fiber * x.euler(),
+        subgroup_generators: pres.ngens,
+        subgroup_relators: pres.relators.length(),
+        h1_rank: rank,
+        h1_torsion: torsion,
+        faces_lift: defects == 0,
+      })
+    }
+  }
+}

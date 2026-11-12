@@ -301,6 +301,58 @@ pub fn round_two_audit() -> Array[(String, String, Bool)] raise {
       torus_rws.convergent && unique,
     ),
   )
+  // HIT 的 Code 族：泛覆疊作為類型族，π₁ 無限亦然
+  for
+    sample in [
+      ("S1", @s4.bouquet(1), 6, 6),
+      ("the figure eight (free group F2)", @s4.bouquet(2), 4, 4),
+      ("the torus (Z^2)", @s4.torus(), 4, 4),
+      ("the Klein bottle (Z ⋊ Z)", @s4.klein_bottle(), 4, 4),
+      ("RP2 (Z/2)", @s4.rp2(), 3, 5),
+      ("a disk with a handle loop (three points)", @s4.disk_with_loop(), 3, 4),
+    ] {
+    let (name, x, code_len, path_len) = sample
+    match x.code_family(max_rules=200) {
+      None =>
+        out.push(
+          ("S4 encode–decode for " + name, "no convergent system", false),
+        )
+      Some(fam) => {
+        let r = fam.verify_encode_decode(code_len, path_len)
+        out.push(
+          (
+            "S4 encode–decode for " + name,
+            "\{r.window} codes in the window, \{r.paths_checked} paths",
+            r.holds(),
+          ),
+        )
+        let (n, ua_ok) = fam.verify_univalence_computation(
+          code_len - 1,
+          path_len,
+        )
+        out.push(
+          (
+            "S4 transport along ua computes for " + name,
+            "\{n} instances",
+            ua_ok,
+          ),
+        )
+      }
+    }
+  }
+  match @s4.bouquet(1).code_family(max_rules=50) {
+    Some(circle) => {
+      let w = circle.encode([0, 0, 0, 1, 0, 0])
+      out.push(
+        (
+          "S4 winding number of loop^3 · loop^-1 · loop^2",
+          @s4.show_word(w),
+          w.length() == 4,
+        ),
+      )
+    }
+    None => out.push(("S4 winding number", "no family", false))
+  }
   // ── S5
   let (st, st_ok) = @s5.verify_nonabelian_stokes(3, 2, 4, 40, 1)
   out.push(("S5 non-abelian Stokes", "\{st} connections", st_ok))
@@ -340,6 +392,86 @@ pub fn round_two_audit() -> Array[(String, String, Bool)] raise {
       )
     None => out.push(("S5 groupoid model of RP2", "not built", false))
   }
+  // 泛覆疊導出的纖維叢與覆疊的分類
+  for
+    sample in [
+      ("5-fold cover of S1", @s4.bouquet(1), [[1, 2, 3, 4, 0]], 1, 0, []),
+      (
+        "3-fold cover of the figure eight",
+        @s4.bouquet(2),
+        [[1, 2, 0], [1, 0, 2]],
+        4,
+        0,
+        [],
+      ),
+      (
+        "4-fold cover of the figure eight",
+        @s4.bouquet(2),
+        [[1, 2, 3, 0], [0, 1, 2, 3]],
+        5,
+        0,
+        [],
+      ),
+      (
+        "6-fold cover of the torus",
+        @s4.torus(),
+        [[1, 0, 3, 2, 5, 4], [2, 3, 4, 5, 0, 1]],
+        7,
+        2,
+        [],
+      ),
+      (
+        "torus double cover of the Klein bottle",
+        @s4.klein_bottle(),
+        [[1, 0], [0, 1]],
+        3,
+        2,
+        [],
+      ),
+      (
+        "Klein double cover of the Klein bottle",
+        @s4.klein_bottle(),
+        [[0, 1], [1, 0]],
+        3,
+        1,
+        [2],
+      ),
+      ("sphere over RP2", @s4.rp2(), [[1, 0]], 1, 0, []),
+    ] {
+    let (name, x, action, gens, rank, torsion) = sample
+    match @s5.classify_covering(x, action) {
+      None => out.push(("S5 " + name, "action rejected", false))
+      Some(c) => {
+        // 楔和（無面）時子群自由，秩由 Nielsen–Schreier 公式給出
+        let schreier = x.faces.length() > 0 ||
+          (
+            c.subgroup_relators == 0 &&
+            c.subgroup_generators == 1 + c.sheets * (x.edges.length() - 1) &&
+            c.h1_rank == c.subgroup_generators
+          )
+        out.push(
+          (
+            "S5 " + name,
+            "subgroup on \{c.subgroup_generators} generators and \{c.subgroup_relators} relators, H1 rank \{c.h1_rank}",
+            c.connected &&
+            c.euler_multiplicative &&
+            c.faces_lift &&
+            c.subgroup_generators == gens &&
+            (x.faces.length() == 0 || c.h1_rank == rank) &&
+            c.h1_torsion == torsion &&
+            schreier,
+          ),
+        )
+      }
+    }
+  }
+  out.push(
+    (
+      "S5 an action violating the torus relator is rejected",
+      "a ↦ (0 1 2), b ↦ (0 1)",
+      @s5.classify_covering(@s4.torus(), [[1, 2, 0], [1, 0, 2]]) is None,
+    ),
+  )
   // ── S6
   let torus = @s6.torus_dgla(@s6.sl2())
   let ax = torus.verify_axioms()
