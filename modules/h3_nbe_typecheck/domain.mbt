@@ -134,6 +134,8 @@ pub(all) struct Kernel {
   mut beta : Int32
   /// ι 收縮（投影、if、rec、J）次數
   mut iota : Int32
+  /// ζ 收縮（核心層定義的展開；惰性，定義體至多求值一次）次數
+  mut zeta : Int32
   /// 回讀時於中性項上施行的 η 展開次數
   mut eta : Int32
   /// 其中屬於 Unit 類型的 η（中性項回讀為 star；無類型演算法無法施行者）
@@ -161,6 +163,7 @@ pub fn Kernel::new() -> Kernel {
     conv_fast: 0,
     conv_typed: 0,
     conv_physical: 0,
+    zeta: 0,
   }
 }
 
@@ -283,6 +286,10 @@ pub fn Kernel::eval(self : Kernel, env : Env, t : Tm) -> Val raise KernelError {
     IdTy(a, x, y) =>
       VIdTy(self.delay(env, a), self.delay(env, x), self.delay(env, y))
     Refl(a) => VRefl(self.delay(env, a))
+    Let(_, e, b) => {
+      self.zeta += 1
+      self.eval(Cons(self.delay(env, e), env), b)
+    }
     J(c, d, p) =>
       match self.eval(env, p) {
         VRefl(a) => {

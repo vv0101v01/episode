@@ -415,3 +415,174 @@ pub fn verify_subject_reduction(
   }
   (steps, preserved, terminated, size)
 }
+
+///|
+/// 組合範例 5 — 張量積與加法結構的對偶。線性層（模式 1）中：
+///   ⊗ 對 ⊕ 分配（兩個方向）；⊗ ⊣ ⊸（柯里化兩個方向）；
+///   ⊕ 為餘積：(A ⊸ C) & (B ⊸ C) ≅ (A ⊕ B ⊸ C)；& 為積：(C ⊸ A) & (C ⊸ B) ⊸ (C ⊸ A & B)。
+/// 反例：加法的 & 不能充當乘法的 ⊗。
+pub fn tensor_additive_claims() -> Array[Claim] {
+  let a = Prop::Atom("A", 1)
+  let b = Prop::Atom("B", 1)
+  let c = Prop::Atom("C", 1)
+  [
+    {
+      name: "distribution A ⊗ (B ⊕ C) ⊸ (A ⊗ B) ⊕ (A ⊗ C)",
+      term: distribute_term(a, b, c),
+      goal: Lolli(Tensor(a, Plus(b, c)), Plus(Tensor(a, b), Tensor(a, c))),
+      expected: true,
+    },
+    {
+      name: "factoring (A ⊗ B) ⊕ (A ⊗ C) ⊸ A ⊗ (B ⊕ C)",
+      term: factor_term(a, b, c),
+      goal: Lolli(Plus(Tensor(a, b), Tensor(a, c)), Tensor(a, Plus(b, c))),
+      expected: true,
+    },
+    {
+      name: "currying (A ⊗ B ⊸ C) ⊸ A ⊸ B ⊸ C",
+      term: Lam(
+        Lolli(Tensor(a, b), c),
+        Lam(a, Lam(b, App(Var(2), Pair(Var(1), Var(0))))),
+      ),
+      goal: Lolli(Lolli(Tensor(a, b), c), Lolli(a, Lolli(b, c))),
+      expected: true,
+    },
+    {
+      name: "uncurrying (A ⊸ B ⊸ C) ⊸ A ⊗ B ⊸ C",
+      term: Lam(
+        Lolli(a, Lolli(b, c)),
+        Lam(Tensor(a, b), LetPair(Var(0), App(App(Var(3), Var(1)), Var(0)))),
+      ),
+      goal: Lolli(Lolli(a, Lolli(b, c)), Lolli(Tensor(a, b), c)),
+      expected: true,
+    },
+    {
+      name: "copairing (A ⊸ C) & (B ⊸ C) ⊸ A ⊕ B ⊸ C",
+      term: Lam(
+        With(Lolli(a, c), Lolli(b, c)),
+        Lam(
+          Plus(a, b),
+          Case(Var(0), App(Fst(Var(2)), Var(0)), App(Snd(Var(2)), Var(0))),
+        ),
+      ),
+      goal: Lolli(With(Lolli(a, c), Lolli(b, c)), Lolli(Plus(a, b), c)),
+      expected: true,
+    },
+    {
+      name: "restriction (A ⊕ B ⊸ C) ⊸ (A ⊸ C) & (B ⊸ C)",
+      term: Lam(
+        Lolli(Plus(a, b), c),
+        WithPair(
+          Lam(a, App(Var(1), Inl(b, Var(0)))),
+          Lam(b, App(Var(1), Inr(a, Var(0)))),
+        ),
+      ),
+      goal: Lolli(Lolli(Plus(a, b), c), With(Lolli(a, c), Lolli(b, c))),
+      expected: true,
+    },
+    {
+      name: "pairing (C ⊸ A) & (C ⊸ B) ⊸ C ⊸ A & B",
+      term: Lam(
+        With(Lolli(c, a), Lolli(c, b)),
+        Lam(c, WithPair(App(Fst(Var(1)), Var(0)), App(Snd(Var(1)), Var(0)))),
+      ),
+      goal: Lolli(With(Lolli(c, a), Lolli(c, b)), Lolli(c, With(a, b))),
+      expected: true,
+    },
+    {
+      name: "A ⊗ (B & C) ⊸ (A ⊗ B) & (A ⊗ C)",
+      term: Lam(
+        Tensor(a, With(b, c)),
+        LetPair(
+          Var(0),
+          WithPair(Pair(Var(1), Fst(Var(0))), Pair(Var(1), Snd(Var(0)))),
+        ),
+      ),
+      goal: Lolli(Tensor(a, With(b, c)), With(Tensor(a, b), Tensor(a, c))),
+      expected: true,
+    },
+    // 反例：& 的兩個分量共用同一份資源，不能同時取出
+    {
+      name: "A & B ⊸ A ⊗ B",
+      term: Lam(With(a, b), Pair(Fst(Var(0)), Snd(Var(0)))),
+      goal: Lolli(With(a, b), Tensor(a, b)),
+      expected: false,
+    },
+    // 反例：⊕ 的注入不能憑空製造另一側
+    {
+      name: "A ⊕ B ⊸ A",
+      term: Lam(Plus(a, b), Case(Var(0), Var(0), Var(0))),
+      goal: Lolli(Plus(a, b), a),
+      expected: false,
+    },
+  ]
+}
+
+///|
+fn distribute_term(a : Prop, b : Prop, c : Prop) -> Tm {
+  Lam(
+    Tensor(a, Plus(b, c)),
+    LetPair(
+      Var(0),
+      Case(
+        Var(0),
+        Inl(Tensor(a, c), Pair(Var(2), Var(0))),
+        Inr(Tensor(a, b), Pair(Var(2), Var(0))),
+      ),
+    ),
+  )
+}
+
+///|
+fn factor_term(a : Prop, b : Prop, c : Prop) -> Tm {
+  Lam(
+    Plus(Tensor(a, b), Tensor(a, c)),
+    Case(
+      Var(0),
+      LetPair(Var(0), Pair(Var(1), Inl(c, Var(0)))),
+      LetPair(Var(0), Pair(Var(1), Inr(b, Var(0)))),
+    ),
+  )
+}
+
+///|
+/// 含切的往返：分配後再提取公因子（及反向）作用於具體的注入，
+/// 供 `verify_subject_reduction` 逐步約簡。
+pub fn tensor_additive_cuts() -> Array[Claim] {
+  let a = Prop::Atom("A", 1)
+  let b = Prop::Atom("B", 1)
+  let c = Prop::Atom("C", 1)
+  let left = Plus(Tensor(a, b), Tensor(a, c))
+  [
+    {
+      name: "factor ∘ distribute on a ⊗ inl b",
+      term: Lam(
+        a,
+        Lam(
+          b,
+          App(
+            factor_term(a, b, c),
+            App(distribute_term(a, b, c), Pair(Var(1), Inl(c, Var(0)))),
+          ),
+        ),
+      ),
+      goal: Lolli(a, Lolli(b, Tensor(a, Plus(b, c)))),
+      expected: true,
+    },
+    {
+      name: "distribute ∘ factor on inr (a ⊗ c)",
+      term: Lam(
+        a,
+        Lam(
+          c,
+          App(
+            distribute_term(a, b, c),
+            App(factor_term(a, b, c), Inr(Tensor(a, b), Pair(Var(1), Var(0)))),
+          ),
+        ),
+      ),
+      goal: Lolli(a, Lolli(c, left)),
+      expected: true,
+    },
+  ]
+}

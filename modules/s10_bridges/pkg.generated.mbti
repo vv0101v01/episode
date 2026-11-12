@@ -20,9 +20,15 @@ pub fn count_equivariant(GSet, GSet) -> Int32
 
 pub fn cyclic_presentation(Int32) -> @s4_rewriting_cover.Presentation
 
+pub fn distribute(Array[Multiset]) -> Multiset
+
 pub fn dm_to_bool(@s1_de_morgan_cubes.Dm) -> String
 
 pub fn eckmann_hilton(@s4_rewriting_cover.Presentation) -> EckmannHilton?
+
+pub fn evaluate(Multiset, (Int32) -> Int32) -> Int32
+
+pub fn flatten_sum(Multiset) -> Multiset
 
 pub fn gluing_sample(Int32, Int32, Int32, Int32, Int32) -> GluingReport
 
@@ -50,7 +56,13 @@ pub fn subgroup(Array[Array[Int32]], Array[Int32]) -> Array[Int32]
 
 pub fn subgroup_table(Array[Array[Int32]], Array[Int32]) -> Array[Array[Int32]]
 
+pub fn substitute(Multiset, (Int32) -> Multiset) -> Multiset
+
 pub fn upper_triangular() -> Algebra
+
+pub fn variable(Int32) -> Multiset
+
+pub fn verify_distributive_law(Int32) -> DistributiveLaw
 
 pub fn verify_gluing(@s4_rewriting_cover.Complex, @s5_connection_curvature.Connection, Array[Int32], Array[Int32]) -> GluingReport
 
@@ -81,6 +93,17 @@ pub(all) struct BooleanQuotient {
   refuted : Int32
   collapsed : Int32
 }
+
+pub(all) struct DistributiveLaw {
+  unit_sum : Bool
+  unit_product : Bool
+  mult_sum : Bool
+  mult_product : Bool
+  composite_monad : Bool
+  evaluation_is_algebra : Bool
+  instances : Int32
+}
+pub fn DistributiveLaw::all(Self) -> Bool
 
 pub(all) struct EckmannHilton {
   e1_components : Int32
@@ -120,6 +143,14 @@ pub(all) struct KanReport {
   right_hom : (Int32, Int32)
 }
 pub fn KanReport::holds(Self) -> Bool
+
+pub(all) struct Multiset {
+  terms : Array[(Array[Int32], Int32)]
+}
+pub fn Multiset::decode(Array[Int32]) -> Self
+pub fn Multiset::encode(Self) -> Array[Int32]
+pub fn Multiset::of(Array[(Array[Int32], Int32)]) -> Self
+pub fn Multiset::same(Self, Self) -> Bool
 
 // Type aliases
 

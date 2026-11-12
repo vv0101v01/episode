@@ -192,8 +192,8 @@ pub fn eckmann_hilton(pres : @s4.Presentation) -> EckmannHilton? {
         ab *= t
       }
       Some({
-        e1_components: @s9.configuration_space(1, 4).b0,
-        e2_components: @s9.configuration_space(2, 3).b0,
+        e1_components: @s9.configuration_space(1, 4).betti[0],
+        e2_components: @s9.configuration_space(2, 3).betti[0],
         e1_action_is_product: is_product,
         commutative,
         abelianization_order: ab,
@@ -422,6 +422,18 @@ pub fn round_two_audit() -> Array[(String, String, Bool)] raise {
       ),
     )
   }
+  let (ta_good, ta_total) = @s7.verify_claims(lnl, @s7.tensor_additive_claims())
+  let (ta_steps, ta_preserved, ta_terminated, _) = @s7.verify_subject_reduction(
+    lnl,
+    @s7.tensor_additive_cuts(),
+  )
+  out.push(
+    (
+      "S7 tensor–additive duality",
+      "\{ta_good}/\{ta_total} claims, \{ta_steps} reduction steps on round trips",
+      ta_good == ta_total && ta_preserved && ta_terminated && ta_steps > 0,
+    ),
+  )
   let (adj, adj_a, adj_b) = @s7.verify_adjunction()
   out.push(("S7 down ⊣ up", "\{adj} instances", adj_a && adj_b))
   let (steps, preserved, terminated, _) = @s7.verify_subject_reduction(
@@ -451,14 +463,18 @@ pub fn round_two_audit() -> Array[(String, String, Bool)] raise {
   }
   let (acts, act_ok) = @s9.verify_loop_action(12)
   out.push(("S9 E1 action on loops", "\{acts} instances", act_ok))
-  for cfg in [(1, 4, 2, 0), (2, 3, 1, 1), (3, 3, 1, 0)] {
-    let (d, grid, b0, b1) = cfg
+  for cfg in [(1, 4, [2, 0]), (2, 3, [1, 1]), (2, 4, [1, 1]), (3, 3, [1, 0, 1])] {
+    let (d, grid, expected) = cfg
     let r = @s9.configuration_space(d, grid)
+    let shown = StringBuilder()
+    for b in r.betti {
+      shown.write_string(" \{b}")
+    }
     out.push(
       (
-        "S9 E\{d}(2) has the Betti numbers of S^\{d - 1}",
-        "b0 \{r.b0}, b1 \{r.b1}",
-        r.b0 == b0 && r.b1 == b1,
+        "S9 E\{d}(2) on a \{grid}-grid has the Betti numbers of S^\{d - 1}",
+        "b =" + shown.to_string(),
+        r.betti == expected,
       ),
     )
   }
@@ -519,6 +535,14 @@ pub fn round_two_audit() -> Array[(String, String, Bool)] raise {
       ),
     )
   }
+  let dl = verify_distributive_law(12)
+  out.push(
+    (
+      "S10 distributive law of lists over multisets",
+      "\{dl.instances} instances of the four Beck axioms, composite monad and evaluation algebra",
+      dl.all(),
+    ),
+  )
   let q = boolean_quotient(2)
   out.push(
     (

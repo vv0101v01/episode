@@ -14,6 +14,8 @@ pub fn is_neutral(Tm) -> Bool
 
 pub fn is_normal(Tm) -> Bool
 
+pub fn let_count(Tm) -> Int32
+
 pub fn map_tm(Tm, (Tm, Int32) -> Tm) -> Tm
 
 pub fn numeral(Int32) -> Tm
@@ -29,6 +31,8 @@ pub fn show_tm_at(Tm, Int32) -> String
 pub fn subst_tm(Tm, Int32, Tm) -> Tm
 
 pub fn tm_size(Tm) -> Int32
+
+pub fn zeta_expand(Tm) -> Tm
 
 // Errors
 pub suberror KernelError {
@@ -110,6 +114,7 @@ pub(all) enum Env {
 pub(all) struct Kernel {
   mut beta : Int32
   mut iota : Int32
+  mut zeta : Int32
   mut eta : Int32
   mut eta_unit : Int32
   mut thunks : Int32
@@ -247,6 +252,7 @@ pub(all) enum Rule {
   IdI
   IdE
   Conv
+  LetDef
 }
 pub fn Rule::class(Self) -> RuleClass
 pub fn Rule::equal(Self, Self) -> Bool
@@ -299,6 +305,7 @@ pub(all) enum Tm {
   IdTy(Tm, Tm, Tm)
   Refl(Tm)
   J(Tm, Tm, Tm)
+  Let(Tm, Tm, Tm)
 }
 pub fn Tm::equal(Self, Self) -> Bool
 pub fn Tm::not_equal(Self, Self) -> Bool

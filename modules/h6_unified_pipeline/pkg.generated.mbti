@@ -19,6 +19,8 @@ pub fn system_audit() -> SystemAudit
 // Types and methods
 pub(all) struct PipelineReport {
   term_size : Int32
+  definitions : Int32
+  expanded_size : Int32
   ty : String
   derivation_size : Int32
   formation : Int32

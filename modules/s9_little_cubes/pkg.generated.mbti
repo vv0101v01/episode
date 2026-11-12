@@ -27,11 +27,8 @@ pub(all) struct Box {
 pub(all) struct ConfReport {
   dim : Int32
   grid : Int32
-  vertices : Int32
-  edges : Int32
-  squares : Int32
-  b0 : Int32
-  b1 : Int32
+  cells : Array[Int32]
+  betti : Array[Int32]
 }
 
 pub(all) struct Cubes {

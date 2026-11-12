@@ -8,4 +8,6 @@
 | :-- | :-- |
 | `bridge.mbt` | `embed`、`reify`、`Localizer`（`class_of`、`equivalent`）、`analyze`（`BridgeReport`）、`verify_confluence_squares` |
 
+**以類型為度量的強正規化上界**：`measure_bound(t)` 對簡單類型片段（變數、λ、應用、`0`／`S`／`tt`／`ff`／`star`）以 Gandy 的嚴格單調泛函解釋直接算出最長 β-約簡長度的上界，無需窮舉約簡圖；片段之外回傳 `None`。`BridgeReport.measure_bound` 與窮舉所得 `longest` 並列。`embed` 把 `Let` 嵌為 β-可約式。
+
 定理與演算法編號見根目錄 `Dev.xlsx`；驗證紀錄見根目錄 `README.md` §5.1。

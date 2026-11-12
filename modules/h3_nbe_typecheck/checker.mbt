@@ -26,6 +26,8 @@ pub(all) enum Rule {
   IdE
   /// 轉換／包攝規則：Γ ⊢ t : A，A ≤ B ⟹ Γ ⊢ t : B
   Conv
+  /// 定義規則：Γ ⊢ A type，Γ ⊢ e : A，Γ, x := e : A ⊢ b : B ⟹ Γ ⊢ let x := e in b : B[e/x]
+  LetDef
 }
 
 ///|
@@ -50,7 +52,7 @@ pub fn Rule::class(self : Rule) -> RuleClass {
     UnivF | PiF | SigmaF | UnitF | EmptyF | BoolF | NatF | IdF => Formation
     PiI | SigmaI | UnitI | BoolI | NatI | IdI => Introduction
     PiE | SigmaE1 | SigmaE2 | EmptyE | BoolE | NatE | IdE => Elimination
-    Hyp | Conv => Structural
+    Hyp | Conv | LetDef => Structural
   }
 }
 
@@ -80,6 +82,7 @@ pub fn Rule::name(self : Rule) -> String {
     IdI => "Id-I"
     IdE => "Id-E"
     Conv => "Conv"
+    LetDef => "Let"
   }
 }
 
@@ -321,6 +324,14 @@ pub fn Kernel::infer(
       let da = self.infer(ctx, a)
       let th = self.delay(ctx.env, a)
       { rule: IdI, tm: t, ty: VIdTy(done(da.ty), th, th), premises: [da], }
+    }
+    Let(a, e, b) => {
+      let (da, _) = self.infer_type(ctx, a)
+      let av = self.eval(ctx.env, a)
+      let de = self.check(ctx, e, av)
+      // 定義以懸置綁入語境：b 的類型中出現的 x 直接展開為 e
+      let db = self.infer(ctx.bind_def(av, self.delay(ctx.env, e)), b)
+      { rule: LetDef, tm: t, ty: db.ty, premises: [da, de, db], }
     }
     J(c, d, p) => {
       let dp = self.infer(ctx, p)

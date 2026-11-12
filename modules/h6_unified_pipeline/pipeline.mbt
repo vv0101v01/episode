@@ -6,6 +6,9 @@
 pub(all) struct PipelineReport {
   /// 精化後核心項的大小與其類型
   term_size : Int32
+  /// 核心層定義數，與 ζ-展開（定義代入各使用處）後的項大小
+  definitions : Int32
+  expanded_size : Int32
   ty : String
   /// 推導樹：規則總數與（形成, 引入, 消除, 結構）分佈
   derivation_size : Int32
@@ -58,7 +61,13 @@ pub fn run_pipeline(
   let thunks_created = k.thunks
   let thunks_forced = k.forced
   let arena = @h2.Arena::new()
-  let bridge = @h4.analyze(@h3.Kernel::new(), arena, e.term, budget~)
+  // 約簡圖分析作用於 ζ-展開後的項：核心層定義只在類型檢查與抽取機中保持共享
+  let bridge = @h4.analyze(
+    @h3.Kernel::new(),
+    arena,
+    @h3.zeta_expand(e.term),
+    budget~,
+  )
   let agrees = match @h3.as_numeral(nf) {
     Some(n) => value == "\{n}"
     None =>
@@ -72,6 +81,8 @@ pub fn run_pipeline(
   let nf_id = @h4.embed(arena, nf)
   {
     term_size: @h3.tm_size(e.term),
+    definitions: @h3.let_count(e.term),
+    expanded_size: @h3.tm_size(@h3.zeta_expand(e.term)),
     ty: @h3.show_tm(e.ty),
     derivation_size: e.deriv.size(),
     formation: f,
@@ -107,6 +118,10 @@ pub fn PipelineReport::certified(self : PipelineReport) -> Bool {
   b.verdict == StronglyNormalizing &&
   b.unique_normal_form &&
   b.perpetual_is_longest &&
+  (match b.measure_bound {
+    Some(bound) => bound >= b.longest
+    None => true
+  }) &&
   b.subject_reduction &&
   b.reductions_inverted &&
   b.definitional_agreement
@@ -124,6 +139,9 @@ pub fn PipelineReport::render(self : PipelineReport) -> String {
   sb.write_string("type            : \{self.ty}\n")
   sb.write_string("normal form     : \{self.normal_form}\n")
   sb.write_string(
+    "term            : size \{self.term_size} with \{self.definitions} core definitions (\{self.expanded_size} after zeta-expansion)\n",
+  )
+  sb.write_string(
     "derivation      : \{self.derivation_size} rules (F \{self.formation}, I \{self.introduction}, E \{self.elimination}, S \{self.structural})\n",
   )
   sb.write_string(
@@ -135,6 +153,13 @@ pub fn PipelineReport::render(self : PipelineReport) -> String {
   sb.write_string(
     "reduction graph : \{verdict}; \{b.graph_nodes} terms, \{b.graph_edges} steps; shortest \{b.shortest}, longest \{b.longest}\n",
   )
+  match b.measure_bound {
+    Some(bound) =>
+      sb.write_string(
+        "type measure    : longest reduction <= \{bound} without enumeration (exhaustive longest \{b.longest})\n",
+      )
+    None => ()
+  }
   sb.write_string(
     "strategies      : leftmost \{b.leftmost_steps}, perpetual \{b.perpetual_steps}, Gross-Knuth \{b.gross_knuth_rounds} rounds\n",
   )
@@ -264,6 +289,20 @@ pub fn corpus() -> Array[(String, String)] {
       "large elimination", "(the (if-as (x U1) ((lam (b Bool) b) tt) Nat Bool) ((lam (n Nat) (S n)) 2))",
     ),
     ("unit eta", "(lam (u Unit) u)"),
+    (
+      "simply-typed iteration (type-measure bound)", "((lam (f (-> Nat Nat)) (x Nat) (f (f x))) (lam (n Nat) (S n)) 0)",
+    ),
+    (
+      "simply-typed Church exponent (type-measure bound)", "((lam (g (-> (-> Nat Nat) Nat Nat)) (f (-> Nat Nat)) (g (g f))) (lam (f (-> Nat Nat)) (x Nat) (f (f x))) (lam (n Nat) (S n)) 0)",
+    ),
+    (
+      "erasing redex (type-measure bound)", "((lam (x Nat) (y Nat) x) 1 ((lam (f (-> Nat Nat)) (f (f 0))) (lam (n Nat) (S n))))",
+    ),
+    (
+      "shared core definitions",
+      prelude +
+      "(def two Nat (plus 1 1)) (def four Nat (plus two two)) (fst (the (Sigma (m Nat) (Id Nat m four)) (pair four refl)))",
+    ),
     (
       "erased argument under call-by-need",
       prelude + "((lam (x Nat) (y Nat) x) 1 (plus 1 1))",

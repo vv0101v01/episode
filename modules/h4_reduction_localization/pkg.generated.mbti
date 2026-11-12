@@ -11,6 +11,8 @@ pub fn analyze(@h3_nbe_typecheck.Kernel, @h2_beta_eta_sn.Arena, @h3_nbe_typechec
 
 pub fn embed(@h2_beta_eta_sn.Arena, @h3_nbe_typecheck.Tm) -> Int32
 
+pub fn measure_bound(@h3_nbe_typecheck.Tm) -> Int32?
+
 pub fn reify(@h2_beta_eta_sn.Arena, Int32) -> @h3_nbe_typecheck.Tm
 
 pub fn verify_confluence_squares(@h3_nbe_typecheck.Kernel, @h2_beta_eta_sn.Arena, @h3_nbe_typecheck.Tm, fuel~ : Int32) -> (Int32, Bool) raise @h3_nbe_typecheck.KernelError
@@ -28,6 +30,7 @@ pub(all) struct BridgeReport {
   graph_edges : Int32
   longest : Int32
   shortest : Int32
+  measure_bound : Int32?
   unique_normal_form : Bool
   leftmost_steps : Int32
   perpetual_steps : Int32

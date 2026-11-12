@@ -1,44 +1,45 @@
 ///|
-/// Eₙ(2) 的離散模型：邊長 1/N 的兩個帶標號小方體，位於 Nⁿ 格子的相異格。
-/// 這是有序二點構形空間 Conf₂(ℝⁿ) ≃ Sⁿ⁻¹ 的方體複形模型：
-///   頂點 = 狀態；邊 = 一個方體移到相鄰空格；
-///   方格 = 兩個可交換的移動（兩方體各動一步，或同一方體沿兩個軸各動一步）。
+/// Eₙ(2) 的離散模型：有序二點構形空間 Conf₂(ℝⁿ) ≃ Sⁿ⁻¹ 的方體複形（Abrams 式離散化）。
+/// 兩個帶標號的點位於 gridⁿ 格點上；一個胞腔是格子複形中兩個閉包不交的胞腔之積
+/// σ × τ：σ = 基點 p 加上可動軸集 S，τ = 基點 q 加上可動軸集 T，維數 |S| + |T|。
+/// 0-胞腔為狀態，1-胞腔為一個點沿一個軸移動一步，2-胞腔為兩個可交換的移動，依此類推。
 pub(all) struct ConfReport {
   dim : Int32
   grid : Int32
-  vertices : Int32
-  edges : Int32
-  squares : Int32
-  /// 連通分支數 b₀ 與第一 Betti 數 b₁（𝔽₂ 係數）
-  b0 : Int32
-  b1 : Int32
+  /// 各維胞腔數（0 維至 `betti.length()` 維）
+  cells : Array[Int32]
+  /// 𝔽₂ 係數的 Betti 數 b₀ … b_top，top = max(1, dim − 1)
+  betti : Array[Int32]
 }
 
 ///|
-/// 𝔽₂ 上的秩（列以 30 位元分塊存放）。
-fn rank_gf2(rows : Array[Array[Int32]], ncols : Int32) -> Int32 {
-  let words = (ncols + 29) / 30
+/// 𝔽₂ 上一組稀疏向量（各以非零座標列表給出）的秩：逐一對「最低非零位 → 向量」的
+/// 樞軸表消去。向量以 30 位元分塊存放。
+fn rank_gf2(columns : Array[Array[Int32]], nrows : Int32) -> Int32 {
+  let words = (nrows + 29) / 30
+  let pivots : Map[Int32, Array[Int32]] = Map([])
   let mut rank = 0
-  let used = Array::make(rows.length(), false)
-  for col in 0..<ncols {
-    let w = col / 30
-    let bit = 1 << (col % 30)
-    let mut piv = -1
-    for r in 0..<rows.length() {
-      if !used[r] && (rows[r][w] & bit) != 0 {
-        piv = r
-        break
+  for col in columns {
+    let v = Array::make(words, 0)
+    for r in col {
+      v[r / 30] = v[r / 30] ^ (1 << (r % 30))
+    }
+    let mut w = 0
+    while w < words {
+      if v[w] == 0 {
+        w += 1
+        continue
       }
-    }
-    if piv < 0 {
-      continue
-    }
-    used[piv] = true
-    rank += 1
-    for r in 0..<rows.length() {
-      if r != piv && (rows[r][w] & bit) != 0 {
-        for k in 0..<words {
-          rows[r][k] = rows[r][k] ^ rows[piv][k]
+      let low = w * 30 + v[w].ctz()
+      match pivots.get(low) {
+        Some(pv) =>
+          for k in w..<words {
+            v[k] = v[k] ^ pv[k]
+          }
+        None => {
+          pivots[low] = v
+          rank += 1
+          break
         }
       }
     }
@@ -47,168 +48,109 @@ fn rank_gf2(rows : Array[Array[Int32]], ncols : Int32) -> Int32 {
 }
 
 ///|
-/// 建立離散構形複形並計算 b₀、b₁。
+/// 建立離散構形複形並計算 Betti 數。
 pub fn configuration_space(dim : Int32, grid : Int32) -> ConfReport {
-  let mut cells = 1
+  let top = if dim > 2 { dim - 1 } else { 1 }
+  let mut points = 1
   for _ in 0..<dim {
-    cells *= grid
+    points *= grid
   }
-  // 相鄰格：沿軸 a 正向移動一步（越界為 -1）
-  let step = fn(cell : Int32, axis : Int32) -> Int32 {
+  let masks = 1 << dim
+  let coord = fn(p : Int32, axis : Int32) -> Int32 {
     let mut stride = 1
     for _ in 0..<axis {
       stride *= grid
     }
-    let coord = cell / stride % grid
-    if coord + 1 >= grid {
-      -1
-    } else {
-      cell + stride
-    }
+    p / stride % grid
   }
-  let state = fn(p : Int32, q : Int32) -> Int32 { p * cells + q }
-  let valid = fn(p : Int32, q : Int32) -> Bool { p >= 0 && q >= 0 && p != q }
-  // 頂點編號
-  let vid = Array::make(cells * cells, -1)
-  let mut nv = 0
-  for p in 0..<cells {
-    for q in 0..<cells {
-      if p != q {
-        vid[state(p, q)] = nv
-        nv += 1
+  let stride_of = fn(axis : Int32) -> Int32 {
+    let mut stride = 1
+    for _ in 0..<axis {
+      stride *= grid
+    }
+    stride
+  }
+  // 格子胞腔 (p, S) 合法：S 中每個軸上 p 皆可再進一步
+  let fits = fn(p : Int32, s : Int32) -> Bool {
+    for a in 0..<dim {
+      if ((s >> a) & 1) == 1 && coord(p, a) + 1 >= grid {
+        return false
       }
     }
+    true
   }
-  // 邊：以（狀態, 哪個方體, 軸）編號，只取正向
-  let eid : Map[Int32, Int32] = Map([])
-  let edge_ends : Array[(Int32, Int32)] = []
-  let edge_key = fn(s : Int32, who : Int32, axis : Int32) -> Int32 {
-    (s * 2 + who) * dim + axis
+  // 兩個格子胞腔閉包不交 ⇔ 存在某軸使兩個閉區間不交
+  let disjoint = fn(p : Int32, s : Int32, q : Int32, t : Int32) -> Bool {
+    for a in 0..<dim {
+      let pa = coord(p, a)
+      let qa = coord(q, a)
+      if pa + ((s >> a) & 1) < qa || qa + ((t >> a) & 1) < pa {
+        return true
+      }
+    }
+    false
   }
-  for p in 0..<cells {
-    for q in 0..<cells {
-      if p == q {
+  let key = fn(p : Int32, s : Int32, q : Int32, t : Int32) -> Int32 {
+    ((p * masks + s) * points + q) * masks + t
+  }
+  // 依維數列舉胞腔（至 top + 1 維）
+  let index : Map[Int32, Int32] = Map([])
+  let by_dim : Array[Array[(Int32, Int32, Int32, Int32)]] = []
+  for _ in 0..<(top + 2) {
+    by_dim.push([])
+  }
+  for p in 0..<points {
+    for s in 0..<masks {
+      if !fits(p, s) {
         continue
       }
-      for axis in 0..<dim {
-        let p2 = step(p, axis)
-        if valid(p2, q) {
-          eid[edge_key(state(p, q), 0, axis)] = edge_ends.length()
-          edge_ends.push((vid[state(p, q)], vid[state(p2, q)]))
-        }
-        let q2 = step(q, axis)
-        if valid(p, q2) {
-          eid[edge_key(state(p, q), 1, axis)] = edge_ends.length()
-          edge_ends.push((vid[state(p, q)], vid[state(p, q2)]))
-        }
-      }
-    }
-  }
-  let ne = edge_ends.length()
-  // b₀：並查集
-  let parent : Array[Int32] = []
-  for i in 0..<nv {
-    parent.push(i)
-  }
-  let find = fn(a : Int32) -> Int32 {
-    let mut r = a
-    while parent[r] != r {
-      r = parent[r]
-    }
-    r
-  }
-  for e in edge_ends {
-    let (u, v) = e
-    let ru = find(u)
-    let rv = find(v)
-    if ru != rv {
-      parent[ru] = rv
-    }
-  }
-  let mut b0 = 0
-  for i in 0..<nv {
-    if parent[i] == i {
-      b0 += 1
-    }
-  }
-  // 方格的邊界（四條邊），以 𝔽₂ 列向量存放
-  let words = (ne + 29) / 30
-  let rows : Array[Array[Int32]] = []
-  let add_square = fn(es : Array[Int32]) {
-    let row = Array::make(words, 0)
-    for e in es {
-      row[e / 30] = row[e / 30] ^ (1 << (e % 30))
-    }
-    rows.push(row)
-  }
-  let get = fn(s : Int32, who : Int32, axis : Int32) -> Int32 {
-    eid.get(edge_key(s, who, axis)).unwrap_or(-1)
-  }
-  for p in 0..<cells {
-    for q in 0..<cells {
-      if p == q {
-        continue
-      }
-      let s = state(p, q)
-      // (i) 兩個方體各動一步
-      for a in 0..<dim {
-        for b in 0..<dim {
-          let p2 = step(p, a)
-          let q2 = step(q, b)
-          if p2 < 0 || q2 < 0 {
+      for q in 0..<points {
+        for t in 0..<masks {
+          let k = s.popcnt() + t.popcnt()
+          if k > top + 1 || !fits(q, t) || !disjoint(p, s, q, t) {
             continue
           }
-          if p == q2 || p2 == q || p2 == q2 {
-            continue
-          }
-          let e1 = get(s, 0, a)
-          let e2 = get(s, 1, b)
-          let e3 = get(state(p2, q), 1, b)
-          let e4 = get(state(p, q2), 0, a)
-          if e1 >= 0 && e2 >= 0 && e3 >= 0 && e4 >= 0 {
-            add_square([e1, e2, e3, e4])
-          }
-        }
-      }
-      // (ii) 同一方體沿兩個軸各動一步
-      for a in 0..<dim {
-        for b in (a + 1)..<dim {
-          // who = 0 移動 p、who = 1 移動 q；另一個方體留在原位
-          for who in 0..<2 {
-            let (mover, other) = if who == 0 { (p, q) } else { (q, p) }
-            let ma = step(mover, a)
-            let mb = step(mover, b)
-            if ma < 0 || mb < 0 {
-              continue
-            }
-            let mab = step(ma, b)
-            if mab < 0 || ma == other || mb == other || mab == other {
-              continue
-            }
-            let at = fn(m : Int32) -> Int32 {
-              if who == 0 {
-                state(m, q)
-              } else {
-                state(p, m)
-              }
-            }
-            let e1 = get(s, who, a)
-            let e2 = get(s, who, b)
-            let e3 = get(at(ma), who, b)
-            let e4 = get(at(mb), who, a)
-            if e1 >= 0 && e2 >= 0 && e3 >= 0 && e4 >= 0 {
-              add_square([e1, e2, e3, e4])
-            }
-          }
+          index[key(p, s, q, t)] = by_dim[k].length()
+          by_dim[k].push((p, s, q, t))
         }
       }
     }
   }
-  let squares = rows.length()
-  let r2 = rank_gf2(rows, ne)
-  // b₁ = dim ker ∂₁ − rank ∂₂ = (E − (V − b₀)) − rank ∂₂
-  let b1 = ne - (nv - b0) - r2
-  { dim, grid, vertices: nv, edges: ne, squares, b0, b1, }
+  // ∂ₖ 的秩：每個 k-胞腔的邊界為去掉一個可動軸後的前、後兩個面
+  let ranks : Array[Int32] = [0]
+  for k in 1..<(top + 2) {
+    let columns : Array[Array[Int32]] = []
+    for cell in by_dim[k] {
+      let (p, s, q, t) = cell
+      let faces : Array[Int32] = []
+      for a in 0..<dim {
+        let bit = 1 << a
+        if (s & bit) != 0 {
+          faces.push(index.get(key(p, s ^ bit, q, t)).unwrap_or(-1))
+          faces.push(
+            index.get(key(p + stride_of(a), s ^ bit, q, t)).unwrap_or(-1),
+          )
+        }
+        if (t & bit) != 0 {
+          faces.push(index.get(key(p, s, q, t ^ bit)).unwrap_or(-1))
+          faces.push(
+            index.get(key(p, s, q + stride_of(a), t ^ bit)).unwrap_or(-1),
+          )
+        }
+      }
+      columns.push(faces)
+    }
+    ranks.push(rank_gf2(columns, by_dim[k - 1].length()))
+  }
+  let cells : Array[Int32] = []
+  let betti : Array[Int32] = []
+  for k in 0..<(top + 2) {
+    cells.push(by_dim[k].length())
+  }
+  for k in 0..<(top + 1) {
+    betti.push(cells[k] - ranks[k] - ranks[k + 1])
+  }
+  { dim, grid, cells, betti, }
 }
 
 ///|

@@ -431,7 +431,7 @@ fn Kernel::elab_check(
         ctx: ctx.bind_def(tv, self.delay(ctx.env, etm)),
         names: Name(x, sc.names),
       }
-      subst_tm(self.elab_check(inner, body, expected), 0, etm)
+      Let(ttm, etm, self.elab_check(inner, body, expected))
     }
     _ => {
       let (t, ty) = self.elab_synth(sc, r)
@@ -602,7 +602,7 @@ fn Kernel::elab_synth(
         names: Name(x, sc.names),
       }
       let (btm, bty) = self.elab_synth(inner, body)
-      (subst_tm(btm, 0, etm), bty)
+      (Let(ttm, etm, btm), bty)
     }
   }
 }

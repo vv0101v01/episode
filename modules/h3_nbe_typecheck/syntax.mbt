@@ -29,6 +29,8 @@ pub(all) enum Tm {
   IdTy(Tm, Tm, Tm)
   Refl(Tm)
   J(Tm, Tm, Tm)
+  /// 核心層定義 let x : A := e in b（b 綁定 1）；計算規則為 ζ：b[e/x]
+  Let(Tm, Tm, Tm)
 }
 
 ///|
@@ -91,6 +93,7 @@ pub fn map_tm(t : Tm, f : (Tm, Int32) -> Tm) -> Tm {
     IdTy(a, x, y) => IdTy(f(a, 0), f(x, 0), f(y, 0))
     Refl(a) => Refl(f(a, 0))
     J(c, d, p) => J(f(c, 3), f(d, 1), f(p, 0))
+    Let(a, e, b) => Let(f(a, 0), f(e, 0), f(b, 1))
   }
 }
 
@@ -305,6 +308,15 @@ fn write_tm(sb : StringBuilder, t : Tm, d : Int32) -> Unit {
       write_tm(sb, p, d)
       sb.write_string(")")
     }
+    Let(a, e, b) => {
+      sb.write_string("(let (x\{d} ")
+      write_tm(sb, a, d)
+      sb.write_string(" ")
+      write_tm(sb, e, d)
+      sb.write_string(") ")
+      write_tm(sb, b, d + 1)
+      sb.write_string(")")
+    }
   }
 }
 
@@ -322,4 +334,25 @@ fn write_form(
     write_tm(sb, a, d)
   }
   sb.write_string(")")
+}
+
+///|
+/// ζ-展開：把一切核心層定義 `let x : A := e in b` 以代換 b[e/x] 消去。
+/// 結果不含 `Let`，供只認 β/ι 的下游（約簡圖、抽取機）使用；項可能指數膨脹。
+pub fn zeta_expand(t : Tm) -> Tm {
+  match t {
+    Let(_, e, b) => zeta_expand(subst_tm(b, 0, e))
+    _ => map_tm(t, fn(x, _b) { zeta_expand(x) })
+  }
+}
+
+///|
+/// 項中核心層定義的個數。
+pub fn let_count(t : Tm) -> Int32 {
+  let mut n = if t is Let(_, _, _) { 1 } else { 0 }
+  let _ = map_tm(t, fn(x, _b) {
+    n += let_count(x)
+    x
+  })
+  n
 }

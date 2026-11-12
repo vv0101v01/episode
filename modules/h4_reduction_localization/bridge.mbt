@@ -31,6 +31,8 @@ pub fn embed(a : @h2.Arena, t : @h3.Tm) -> Int32 {
     IdTy(x, y, z) => IdTy(embed(a, x), embed(a, y), embed(a, z))
     Refl(x) => Refl(embed(a, x))
     J(c, d, p) => J(embed(a, c), embed(a, d), embed(a, p))
+    // 核心層定義嵌為 β-可約式：ζ 即 (λx:A. b) e ▷ b[e/x]
+    Let(ty, e, b) => App(a.mk(Lam(embed(a, ty), embed(a, b))), embed(a, e))
   }
   a.mk(n)
 }
@@ -131,6 +133,8 @@ pub(all) struct BridgeReport {
   graph_edges : Int32
   longest : Int32
   shortest : Int32
+  /// 以類型為度量的最長約簡長度上界（僅簡單類型片段；片段之外為 None）
+  measure_bound : Int32?
   unique_normal_form : Bool
   /// 各策略步數
   leftmost_steps : Int32
@@ -216,6 +220,7 @@ pub fn analyze(
     graph_nodes: cert.nodes,
     graph_edges: cert.edges,
     longest: cert.longest,
+    measure_bound: measure_bound(t),
     shortest: cert.shortest,
     unique_normal_form: cert.normal_forms.length() == 1 &&
     cert.normal_forms[0] == lo.result,
@@ -258,4 +263,169 @@ pub fn verify_confluence_squares(
     }
   }
   (pairs, ok)
+}
+
+///|
+/// 簡單類型：基底類型（Nat、Bool、Unit）與非依賴函數類型。
+priv enum STy {
+  Base
+  Arr(STy, STy)
+}
+
+///|
+/// 嚴格單調泛函的值域：基底為自然數，函數類型為泛函。
+priv enum Fun {
+  Num(Int32)
+  Fn((Fun) -> Fun)
+}
+
+///|
+/// 度量的飽和上限（避免溢位；達上限即視為無資訊）。
+const MEASURE_CAP : Int32 = 1000000000
+
+///|
+fn sat_add(a : Int32, b : Int32) -> Int32 {
+  if a + b >= MEASURE_CAP {
+    MEASURE_CAP
+  } else {
+    a + b
+  }
+}
+
+///|
+/// f ⊕ n：逐點加上自然數。
+fn fun_plus(f : Fun, n : Int32) -> Fun {
+  match f {
+    Num(a) => Num(sat_add(a, n))
+    Fn(g) => Fn(fn(x) { fun_plus(g(x), n) })
+  }
+}
+
+///|
+fn fun_apply(f : Fun, a : Fun) -> Fun {
+  match f {
+    Fn(g) => g(a)
+    Num(_) => f
+  }
+}
+
+///|
+/// M_A(n)：類型 A 的最小嚴格單調泛函平移 n；M_{A→B}(n)(a) = M_B(n + S_A(a))。
+fn minimal(ty : STy, n : Int32) -> Fun {
+  match ty {
+    Base => Num(n)
+    Arr(a, b) => Fn(fn(x) { minimal(b, sat_add(n, collapse(a, x))) })
+  }
+}
+
+///|
+/// S_A：把泛函壓回自然數；S_{A→B}(f) = S_B(f(M_A(0)))。
+fn collapse(ty : STy, f : Fun) -> Int32 {
+  match (ty, f) {
+    (Base, Num(n)) => n
+    (Arr(a, b), _) => collapse(b, fun_apply(f, minimal(a, 0)))
+    (Base, Fn(_)) => MEASURE_CAP
+  }
+}
+
+///|
+/// 核心類型 → 簡單類型；含變數（依賴）或其他形成子時為 None。
+fn simple_type(t : @h3.Tm) -> STy? {
+  match t {
+    NatTy | BoolTy | UnitTy => Some(Base)
+    Pi(a, b) =>
+      match (simple_type(a), simple_type(b)) {
+        (Some(x), Some(y)) => Some(Arr(x, y))
+        _ => None
+      }
+    _ => None
+  }
+}
+
+///|
+fn sty_equal(a : STy, b : STy) -> Bool {
+  match (a, b) {
+    (Base, Base) => true
+    (Arr(x, y), Arr(u, v)) => sty_equal(x, u) && sty_equal(y, v)
+    _ => false
+  }
+}
+
+///|
+/// 片段內的簡單類型合成與泛函解釋，一次走訪完成。
+/// 片段：變數、λ（定義域為簡單類型）、應用、以及無計算規則的建構子 0、S、tt、ff、star。
+/// 解釋（Gandy；van de Pol–Schwichtenberg 的嚴格泛函）：
+///   ⟦x⟧ρ = ρ(x)；⟦t u⟧ρ = ⟦t⟧ρ(⟦u⟧ρ)；⟦λx:A. t⟧ρ(a) = ⟦t⟧ρ[x:=a] ⊕ S_A(a) ⊕ 1。
+/// 每步 β 使解釋嚴格下降，故 S(⟦t⟧) 為最長約簡長度的上界。
+fn interpret(t : @h3.Tm, tys : Array[STy], env : Array[Fun]) -> (STy, Fun)? {
+  match t {
+    Var(i) =>
+      if i < tys.length() {
+        Some((tys[tys.length() - 1 - i], env[env.length() - 1 - i]))
+      } else {
+        None
+      }
+    Lam(a, b) =>
+      match simple_type(a) {
+        None => None
+        Some(dom) => {
+          let inner_tys = tys.copy()
+          inner_tys.push(dom)
+          // 先以最小元探出餘域類型，再建立泛函
+          let probe = env.copy()
+          probe.push(minimal(dom, 0))
+          match interpret(b, inner_tys, probe) {
+            None => None
+            Some((cod, _)) =>
+              Some(
+                (
+                  Arr(dom, cod),
+                  Fn(fn(x) {
+                    let extended = env.copy()
+                    extended.push(x)
+                    match interpret(b, inner_tys, extended) {
+                      Some((_, v)) => fun_plus(v, sat_add(collapse(dom, x), 1))
+                      None => Num(MEASURE_CAP)
+                    }
+                  }),
+                ),
+              )
+          }
+        }
+      }
+    App(f, u) =>
+      match (interpret(f, tys, env), interpret(u, tys, env)) {
+        (Some((Arr(dom, cod), fv)), Some((arg, uv))) =>
+          if sty_equal(dom, arg) {
+            Some((cod, fun_apply(fv, uv)))
+          } else {
+            None
+          }
+        _ => None
+      }
+    Zero | Tt | Ff | Star => Some((Base, Num(0)))
+    Succ(n) =>
+      match interpret(n, tys, env) {
+        Some((Base, v)) => Some((Base, v))
+        _ => None
+      }
+    _ => None
+  }
+}
+
+///|
+/// 定理（Gandy 1980；de Vrijer 1987）：簡單類型 λ-項的最長 β-約簡長度 ≤ S(⟦t⟧)。
+/// 對閉項回傳此上界，免於窮舉約簡圖；項不在片段內、或度量達飽和上限時回傳 None。
+pub fn measure_bound(t : @h3.Tm) -> Int32? {
+  match interpret(t, [], []) {
+    None => None
+    Some((ty, v)) => {
+      let n = collapse(ty, v)
+      if n >= MEASURE_CAP {
+        None
+      } else {
+        Some(n)
+      }
+    }
+  }
 }

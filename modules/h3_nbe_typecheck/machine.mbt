@@ -65,6 +65,8 @@ pub fn extract(d : Deriv) -> Code {
     (NatE, _) => CRec(extract(ps[1]), extract(ps[2]), extract(ps[3]))
     (IdI, _) => CRefl(extract(ps[0]))
     (IdE, _) => CJ(extract(ps[1]), extract(ps[2]))
+    // 定義 = 惰性引數：定義體的懸置於機器中至多求值一次，各使用處共享
+    (LetDef, _) => CApp(CLam(extract(ps[2])), extract(ps[1]))
     _ => CBox
   }
 }

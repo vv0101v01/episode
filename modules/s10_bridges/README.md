@@ -10,4 +10,6 @@
 | `morita.mbt` | #11 Morita | `Algebra`、`matrices`、`group_algebra`、`upper_triangular`、`verify_morita`（中心與 HH₀ 於 A ↦ Mₙ(A) 下不變；線性代數取自 S6） |
 | `logic.mbt` | 伽羅瓦對應、#9 Operad | `verify_negation_galois`（S1）、`dm_to_bool`、`boolean_quotient`（S1 × S8 × H3）、`eckmann_hilton`（S9 × S4）、`round_two_audit`（S1–S10 全部定理檢驗的總審計，由 H6 可執行檔呼叫） |
 
+`morita.mbt` 另含組合範例 4（單子分配律）：`Multiset`、`distribute`（λ : 串列∘多重集 ⇒ 多重集∘串列）、`flatten_sum`、`substitute`（複合單子的 Kleisli 代換）、`variable`、`evaluate`、`verify_distributive_law`（Beck 四公理、複合單子律、求值為代數）。
+
 定理與演算法編號見根目錄 `Dev.xlsx`；驗證紀錄見根目錄 `README.md` §9.3。「定理」為樣本或窮舉上的程式檢驗。

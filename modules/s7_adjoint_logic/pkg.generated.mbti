@@ -24,6 +24,10 @@ pub fn substructural_claims() -> Array[Claim]
 
 pub fn substructural_modes() -> Modes
 
+pub fn tensor_additive_claims() -> Array[Claim]
+
+pub fn tensor_additive_cuts() -> Array[Claim]
+
 pub fn tm_size(Tm) -> Int32
 
 pub fn verify_adjunction() -> (Int32, Bool, Bool)

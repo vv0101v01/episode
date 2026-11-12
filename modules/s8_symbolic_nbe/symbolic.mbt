@@ -601,7 +601,8 @@ pub fn prove(
 pub fn prove_source(src : String) -> ProofReport raise @h3.KernelError {
   let k = @h3.Kernel::new()
   let e = k.elaborate(src)
-  prove(k, e.term)
+  // 命題的 Π 前綴須外露：先消去序言的核心層定義
+  prove(k, @h3.zeta_expand(e.term))
 }
 
 ///|
